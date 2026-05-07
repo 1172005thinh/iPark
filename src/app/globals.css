@@ -1,26 +1,193 @@
 @import "tailwindcss";
 
+/* ─── iPark Design Tokens ──────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ip-primary: #2563eb;
+  --ip-primary-light: #3b82f6;
+  --ip-primary-dark: #1d4ed8;
+  --ip-accent: #06b6d4;
+  --ip-success: #10b981;
+  --ip-warning: #f59e0b;
+  --ip-danger: #ef4444;
+  --ip-bg: #f8fafc;
+  --ip-surface: #ffffff;
+  --ip-surface-hover: #f1f5f9;
+  --ip-border: #e2e8f0;
+  --ip-text: #0f172a;
+  --ip-text-secondary: #64748b;
+  --ip-text-muted: #94a3b8;
+  --ip-sidebar-bg: #0f172a;
+  --ip-sidebar-text: #cbd5e1;
+  --ip-sidebar-active: #2563eb;
+  --ip-curve-sm: 0.75rem;
+  --ip-curve-md: 1rem;
+  --ip-curve-lg: 1.5rem;
+  --ip-curve-xl: 2rem;
+  --ip-curve-full: 9999px;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ip-bg: #0f172a;
+    --ip-surface: #1e293b;
+    --ip-surface-hover: #334155;
+    --ip-border: #334155;
+    --ip-text: #f1f5f9;
+    --ip-text-secondary: #94a3b8;
+    --ip-text-muted: #64748b;
+    --ip-sidebar-bg: #020617;
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ip-primary: var(--ip-primary);
+  --color-ip-primary-light: var(--ip-primary-light);
+  --color-ip-primary-dark: var(--ip-primary-dark);
+  --color-ip-accent: var(--ip-accent);
+  --color-ip-success: var(--ip-success);
+  --color-ip-warning: var(--ip-warning);
+  --color-ip-danger: var(--ip-danger);
+  --color-ip-bg: var(--ip-bg);
+  --color-ip-surface: var(--ip-surface);
+  --color-ip-surface-hover: var(--ip-surface-hover);
+  --color-ip-border: var(--ip-border);
+  --color-ip-text: var(--ip-text);
+  --color-ip-text-secondary: var(--ip-text-secondary);
+  --color-ip-text-muted: var(--ip-text-muted);
+  --color-ip-sidebar-bg: var(--ip-sidebar-bg);
+  --color-ip-sidebar-text: var(--ip-sidebar-text);
+  --color-ip-sidebar-active: var(--ip-sidebar-active);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ─── Base Styles ──────────────────────────────────────────────────── */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ip-bg);
+  color: var(--ip-text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* ─── iPark Curve Shapes (Modern Aesthetic) ────────────────────────── */
+
+.ip-card {
+  background: var(--ip-surface);
+  border: 1px solid var(--ip-border);
+  border-radius: var(--ip-curve-xl);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+}
+
+.ip-widget {
+  background: var(--ip-surface);
+  border: 1px solid var(--ip-border);
+  border-radius: var(--ip-curve-lg);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  overflow: hidden;
+}
+
+.ip-btn {
+  border-radius: var(--ip-curve-md);
+  font-weight: 500;
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+
+.ip-btn-primary {
+  background: var(--ip-primary);
+  color: white;
+}
+
+.ip-btn-primary:hover {
+  background: var(--ip-primary-dark);
+  box-shadow: 0 4px 6px -1px rgb(37 99 235 / 0.3);
+}
+
+.ip-input {
+  border: 1px solid var(--ip-border);
+  border-radius: var(--ip-curve-md);
+  padding: 0.625rem 1rem;
+  background: var(--ip-surface);
+  color: var(--ip-text);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  width: 100%;
+}
+
+.ip-input:focus {
+  outline: none;
+  border-color: var(--ip-primary);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.15);
+}
+
+/* ─── Sidebar ──────────────────────────────────────────────────────── */
+
+.ip-sidebar {
+  background: var(--ip-sidebar-bg);
+  color: var(--ip-sidebar-text);
+}
+
+.ip-sidebar-link {
+  border-radius: var(--ip-curve-md);
+  transition: all 150ms ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: var(--ip-sidebar-text);
+}
+
+.ip-sidebar-link:hover {
+  background: rgb(255 255 255 / 0.06);
+  color: white;
+}
+
+.ip-sidebar-link.active {
+  background: var(--ip-sidebar-active);
+  color: white;
+  font-weight: 600;
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ip-border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ip-text-muted);
+}
+
+/* ─── Animations ───────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ip-fade-in {
+  animation: fadeIn 300ms ease-out;
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.ip-slide-in {
+  animation: slideInLeft 300ms ease-out;
 }

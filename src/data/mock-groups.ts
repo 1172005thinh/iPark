@@ -1,0 +1,58 @@
+import type { Group } from '@/types/database';
+
+export const GROUP_DB: Group[] = [
+  {
+    id: 1,
+    group_name: 'admins',
+    display_name: 'Administrators Group',
+    description: 'The group of administrators who have all permissions',
+    permissions_list: [
+      'view_dashboard', 'edit_dashboard', 'add_dashboard', 'delete_dashboard',
+      'view_parks', 'edit_parks', 'add_parks', 'delete_parks',
+      'view_staffs', 'edit_staffs', 'add_staffs', 'delete_staffs',
+      'view_events', 'export_events', 'delete_events',
+      'view_settings', 'edit_settings',
+    ],
+    is_enable: true,
+    created_at: '2026-01-01 00:00:00',
+    last_modified_at: '2026-02-01 12:59:59',
+    last_active: '2026-03-01 17:45:00',
+    is_active: true,
+  },
+  {
+    id: 2,
+    group_name: 'users',
+    display_name: 'Users Group',
+    description: 'The group of regular users (staff members) who have limited permissions',
+    permissions_list: [
+      'view_dashboard',
+      'view_parks',
+      'view_staffs',
+      'view_events',
+      'export_events',
+    ],
+    is_enable: true,
+    created_at: '2026-01-01 00:00:00',
+    last_modified_at: '2026-02-01 12:59:59',
+    last_active: '2026-03-01 17:45:00',
+    is_active: true,
+  },
+  {
+    id: 3,
+    group_name: 'managers',
+    display_name: 'Managers Group',
+    description: 'The group of managers who can view and edit parks, staffs, and events',
+    permissions_list: [
+      'view_dashboard', 'edit_dashboard',
+      'view_parks', 'edit_parks',
+      'view_staffs', 'edit_staffs',
+      'view_events', 'export_events',
+      'view_settings',
+    ],
+    is_enable: true,
+    created_at: '2026-01-15 00:00:00',
+    last_modified_at: '2026-02-15 10:30:00',
+    last_active: '2026-03-01 16:00:00',
+    is_active: true,
+  },
+];
