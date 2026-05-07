@@ -1,10 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
+import { DASHBOARD_DB } from '@/data/mock-dashboards';
+import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
 
 export default function DashboardPage() {
   const { session } = useAuthStore();
   const hasView = session.permissions.includes('view_dashboard');
+  const hasEdit = session.permissions.includes('edit_dashboard');
+
+  const [selectedDashboardId, setSelectedDashboardId] = useState(
+    session.user?.pinned_dashboard_id || DASHBOARD_DB[0]?.id
+  );
+  const [isEditing, setIsEditing] = useState(false);
 
   if (!hasView) {
     return (
@@ -25,15 +34,42 @@ export default function DashboardPage() {
     );
   }
 
+  const currentDashboard = DASHBOARD_DB.find((d) => d.id === selectedDashboardId) || DASHBOARD_DB[0];
+
   return (
-    <div className="ip-fade-in">
+    <div className="ip-fade-in pb-12">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-ip-text">Dashboard</h1>
           <p className="text-sm text-ip-text-secondary mt-1">
             Welcome back, {session.user?.display_name}
           </p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <select
+            className="ip-input py-2 text-sm max-w-[200px]"
+            value={selectedDashboardId}
+            onChange={(e) => setSelectedDashboardId(Number(e.target.value))}
+          >
+            {DASHBOARD_DB.filter(d => d.is_enable).map((d) => (
+              <option key={d.id} value={d.id}>{d.display_name}</option>
+            ))}
+          </select>
+
+          {hasEdit && (
+            <button 
+              onClick={() => setIsEditing(!isEditing)}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${
+                isEditing 
+                ? 'bg-ip-primary text-white border-ip-primary' 
+                : 'bg-ip-bg text-ip-text border-ip-border hover:bg-ip-card'
+              }`}
+            >
+              {isEditing ? 'Done Editing' : 'Edit Layout'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -65,27 +101,30 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Dashboard Widget Placeholder Grid */}
-      <div className="ip-card p-6">
-        <div className="flex items-center justify-between mb-4">
+      {/* Dashboard Widget Grid */}
+      <div className="mt-8">
+        <div className="flex items-center gap-2 mb-4">
           <h2 className="text-lg font-semibold text-ip-text">
-            Widget Grid
+            {currentDashboard.display_name}
           </h2>
-          <span className="text-xs text-ip-text-muted px-3 py-1 bg-ip-bg rounded-full">
-            Phase 3 — Widget Engine
-          </span>
+          {isEditing && (
+            <span className="text-xs bg-ip-warning/10 text-ip-warning px-2 py-1 rounded-full animate-pulse">
+              Edit Mode Active
+            </span>
+          )}
         </div>
-        <div className="grid grid-cols-6 gap-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className={`ip-widget p-4 flex items-center justify-center text-ip-text-muted text-sm ${
-                i <= 2 ? 'col-span-3 h-40' : 'col-span-2 h-32'
-              }`}
-            >
-              Widget Slot {i}
-            </div>
-          ))}
+        
+        <div className="-mx-4 sm:mx-0">
+          <DashboardGrid 
+            dashboard={currentDashboard} 
+            isEditing={isEditing} 
+            onLayoutChange={(layout) => {
+              if (isEditing) {
+                console.log('Layout changed:', layout);
+                // In a real app, save to backend or global store here
+              }
+            }}
+          />
         </div>
       </div>
     </div>

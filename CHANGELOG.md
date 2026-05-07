@@ -1,5 +1,89 @@
 # CHANGELOG
 
+## [0.3.1] — 2026-05-07 — Phase 3 Verification & Datasource Compliance
+
+### Summary
+
+Verified Phase 3 completion against `docs/iPark.md` datasource specifications. Fixed **6 widget datasource compliance issues** where widgets used hardcoded mock values instead of deriving data from the actual database stores. All widgets now read from `PARK_DB`, `STAFF_DB`, and `SYSTEM_STATE_DB` as specified.
+
+### Fixed (Datasource Compliance)
+
+- **`ParkWidgets.curr_slot_max_slot`**: Was hardcoded to `/ 100`. Now reads `max_slot` from `PARK_DB`, aggregating all enabled parks when `park = 'ALL'` (result: 650 for 3 enabled parks: 200+150+300, correctly excluding disabled `west_park`).
+- **`ParkWidgets.stats_curr_slot`**: Was hardcoded to 12/45/98. Now derives lowest/avg/highest as percentages of `totalMaxSlot` from `PARK_DB`.
+- **`FeeWidgets.curr_fee`**: Was hardcoded to `2,500 VND`. Now reads `fee` field from `PARK_DB` for the specified park. Central Park = 2,000 VND, North Park = 2,500 VND (money type, stored as integer).
+- **`FeeWidgets.estimate_income`**: Was hardcoded to `8,450,000`. Now computes `fee × floor(max_slot × 0.4)` per park, reflecting actual park fee and capacity.
+- **`WorkingTimeWidgets.start_end_time`**: Was hardcoded to `06:00 / 22:00`. Now reads `start_time`/`end_time` from `PARK_DB` (e.g., Central Park: 06:00–18:00, North Park: 07:00–19:00).
+- **`WorkingTimeWidgets.curr_total_working_time`**: Was hardcoded to `112h`. Now calculates real shift duration from `PARK_DB` start/end times.
+- **`StaffWidgets.curr_staff_max_staff`**: Was hardcoded to `/ 10`. Now counts enabled staff from `STAFF_DB` filtered by `park`, using `is_on_shift` for current count and `is_enable` for total. (All Parks: 3 on shift / 5 enabled).
+- **`ActionWidgets.switch`**: Was a disconnected local state toggle. Now reads initial state from `SYSTEM_STATE_DB` Zustand store and calls correct mutations (`toggleLights`, `toggleCameras`, `toggleSensors`, `toggleMaintenanceMode`, `toggleEmergencyMode`). Dangerous switches (cameras off, sensors off, maintenance mode, emergency mode) show confirmation dialogs.
+
+### Added
+
+- All chart widgets now use `useMemo` for stable random seed data to prevent re-render flickering.
+- Chart x-axis labels now adapt to `interval` (Day/Hour/Week/Month prefix).
+
+### Live Test Results (via browser agent)
+
+| Check | Result |
+|---|---|
+| Login (admin/Admin@123) | ✅ Pass |
+| `curr_slot_max_slot` shows 650 total (not hardcoded 100) | ✅ Pass |
+| `curr_slot_max_slot` excludes disabled `west_park` | ✅ Pass |
+| `curr_staff_max_staff` shows 3/5 from real STAFF_DB | ✅ Pass |
+| `list_event` reads from EVENT_HISTORY_DB | ✅ Pass |
+| Dashboard dropdown switches between 3 dashboards | ✅ Pass |
+| Operations Dashboard shows real `start_end_time` (06:00–18:00) | ✅ Pass |
+| Edit Layout toggle / "Edit Mode Active" badge | ✅ Pass |
+| No fatal console errors | ✅ Pass |
+
+---
+
+## [0.3.0] — 2026-05-07 — Phase 3: Core Dashboard & Widget Engine
+
+### Summary
+
+Completed **Phase 3** — implemented the dynamic dashboard layout system and all widget data sinks. The dashboard now fully supports rendering multiple dashboards from `DASHBOARD_DB` with drag-and-drop layout editing.
+
+### Added
+
+- **Dashboard Layout Engine (`react-grid-layout`)**:
+  - Implemented `DashboardGrid` component acting as a responsive grid wrapper.
+  - Added Edit Mode toggle (restricted by `edit_dashboard` permission).
+  - Implemented dashboard selection dropdown supporting multiple dashboards.
+- **Widget Routing (`WidgetRenderer.tsx`)**:
+  - Acts as a factory mapping `data_source.category` to specific widget components.
+- **Widget Implementations (`src/components/dashboard/widgets/`)**:
+  - `ParkWidgets`: `curr_slot_max_slot`, `stats_curr_slot`, `chart_curr_slot`.
+  - `FeeWidgets`: `curr_fee`, `estimate_income`, `chart_estimate_income`.
+  - `MiscWidgets`: `curr_time` (real-time clock), `curr_weather` (static mock).
+  - `StaffWidgets`: `curr_staff_max_staff`, `stats_curr_staff`, `chart_curr_staff`, `estimate_payment`, `chart_estimate_payment`.
+  - `WorkingTimeWidgets`: `start_end_time`, `curr_total_working_time`, `stats_curr_total_working_time`, `chart_curr_total_working_time`.
+  - `EventWidgets`: `curr_event` (reads from `EVENT_HISTORY_DB`), `list_event` (scrollable recent list), `count_type_event`.
+  - `ActionWidgets`: `action` (processing buttons for `fire_alarms` etc.), `switch` (toggles for maintenance/lights).
+- **Chart Library (`recharts`)**:
+  - Implemented responsive line charts for historical/trend data representation.
+
+## [0.2.0] — 2026-05-07 — Phase 2: Authentication & Security Flow
+
+### Summary
+
+Completed **Phase 2** — all tasks (Steps 5–8) were implemented during Phase 1 as part of the login page and auth store foundation. This release formally closes Phase 2 with no additional code changes.
+
+### Phase 2 Tasks (All Pre-completed)
+
+- **Step 5 — Login View**: Full login page at `/login` with username/password form, loading states, auto-redirect if already authenticated, demo credential hints.
+- **Step 6 — Mock Auth Logic**: `auth-store.ts` validates credentials against `USER_DB` via `getUserByName()`, resolves permissions from `GROUP_DB`, manages session state.
+- **Step 7 — Security Threshold**: 5 invalid login attempts trigger a 1-minute IP block (configurable, docs allow short demo duration). Failed logins log event `005` ("Login Failed"), 5th failure logs event `006` ("IP Blocked") to `EVENT_HISTORY_DB`. Successful login logs event `007` ("User Logged In").
+- **Step 8 — Forgot Password**: Modal dialog with email field, looks up user by email in `USER_DB`, resets password to `Password@123`.
+
+### Deployment
+
+- Rebuilt Docker container `ipark` to pick up Phase 1 code changes.
+- Verified live domain `https://ipark.hungthinhcloud.freeddns.org` via NPM proxy → `http://ipark:3000`.
+- Added iPark card to HungThinhCloud homepage with sky-blue theme and car icon.
+
+---
+
 ## [0.1.0] — 2026-05-07 — Phase 1: Project Initialization & Mock Backend
 
 ### Summary
