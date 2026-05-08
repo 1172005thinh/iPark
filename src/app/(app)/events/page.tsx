@@ -31,9 +31,12 @@ export default function EventsPage() {
     handlePageSizeChange,
     toggleSelectAll,
     toggleSelectRow,
+    clearSelection,
     isSelected,
     allSelected,
     someSelected,
+    isSelectionMode,
+    selectedIds,
   } = useDataTable({
     data: events,
     initialSortKey: 'id',
@@ -178,6 +181,37 @@ export default function EventsPage() {
           )}
         </div>
       </div>
+      {isSelectionMode && (
+        <div className="mb-4 flex items-center justify-between rounded-2xl bg-ip-primary px-6 py-3 text-white shadow-lg ip-fade-in">
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium">
+              Selected {selectedIds.size} items
+            </span>
+            <button 
+              onClick={clearSelection}
+              className="text-xs underline opacity-80 hover:opacity-100"
+            >
+              Clear selection
+            </button>
+          </div>
+          <div className="flex items-center gap-3">
+            {hasDelete && (
+              <button
+                onClick={() => {
+                  if (confirm(`Delete ${selectedIds.size} selected events?`)) {
+                    selectedIds.forEach(id => deleteEvent(id as number));
+                    clearSelection();
+                  }
+                }}
+                className="flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-sm font-semibold transition-colors hover:bg-white/30"
+              >
+                <Trash2 size={16} />
+                Delete
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="ip-card overflow-hidden rounded-[2rem]">
         <div className="overflow-x-auto">
@@ -209,7 +243,7 @@ export default function EventsPage() {
             </thead>
             <tbody>
               {pagedEvents.map((ev) => (
-                <tr key={ev.id} onClick={() => handleRowClick(ev.id)} className={`border-b border-ip-border last:border-0 hover:bg-ip-surface-hover transition-colors cursor-pointer ${selectedId === ev.id ? 'bg-ip-surface-hover' : ''} ${isSelected(ev.id) ? 'bg-ip-primary/5' : ''} ${!ev.is_acknowledged ? 'font-medium' : ''}`}>
+                <tr key={ev.id} className={`border-b border-ip-border last:border-0 hover:bg-ip-surface-hover transition-colors ${selectedId === ev.id ? 'bg-ip-surface-hover' : ''} ${isSelected(ev.id) ? 'bg-ip-primary/5' : ''} ${!ev.is_acknowledged ? 'font-medium' : ''}`}>
                   <td className="px-5 py-4">
                     <input
                       type="checkbox"
@@ -245,8 +279,9 @@ export default function EventsPage() {
                         )}
                         {hasDelete && (
                           <button
+                            disabled={isSelectionMode}
                             onClick={(e) => handleDeleteRequest(ev.id, e)}
-                            className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600"
+                            className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${isSelectionMode ? 'text-ip-text-muted cursor-not-allowed' : 'text-red-500 hover:bg-red-50 hover:text-red-600'}`}
                           >
                             <Trash2 size={14} />
                             Delete
@@ -293,11 +328,12 @@ export default function EventsPage() {
             {hasDelete && selected ? (
               <button
                 type="button"
+                disabled={isSelectionMode}
                 onClick={() => {
                   handleDeleteRequest(selected.id);
                   setSelectedId(null);
                 }}
-                className="ip-btn rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+                className={`ip-btn rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${isSelectionMode ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-red-50 text-red-600 hover:bg-red-100'}`}
               >
                 Delete Event
               </button>

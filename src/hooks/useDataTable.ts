@@ -113,8 +113,10 @@ export function useDataTable<T extends { id: number | string }>({
     
     // Selection
     selectedIds,
+    isSelectionMode: selectedIds.size > 0,
     toggleSelectAll,
     toggleSelectRow,
+    clearSelection: () => setSelectedIds(new Set()),
     isSelected,
     allSelected,
     someSelected,

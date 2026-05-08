@@ -44,3 +44,10 @@ export const parseTimeToMinutes = (value: string) => {
 export const sameDay = (value: string, expectedDateKey: string) =>
   value.slice(0, 10) === expectedDateKey;
 
+export const isObjectName = isValidObjectName;
+
+export const toStoredTime = (value: string) =>
+  value.length === 5 ? `${value}:00` : value;
+
+export const toInputTime = (value: string) => value.slice(0, 5);
+

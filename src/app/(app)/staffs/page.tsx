@@ -17,6 +17,11 @@ import { useStaffStore } from '@/stores/staff-store';
 import type { Staff } from '@/types/database';
 import { useDataTable } from '@/hooks/useDataTable';
 import { Pagination } from '@/components/shared/Pagination';
+import {
+  isObjectName,
+  toInputTime,
+  toStoredTime,
+} from '@/lib/ipark-utils';
 
 type StaffFormState = {
   staff_name: string;
@@ -56,6 +61,8 @@ export default function StaffsPage() {
     isSelected,
     allSelected,
     someSelected,
+    selectedIds,
+    clearSelection,
   } = useDataTable({
     data: staffs,
     initialSortKey: 'id',
@@ -218,19 +225,49 @@ export default function StaffsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-ip-bg px-3 py-1 text-xs text-ip-text-muted">
-            Editable Store
-          </span>
-          {hasAdd ? (
-            <button
-              type="button"
-              onClick={openCreateDialog}
-              className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/25 hover:bg-ip-primary/90"
-            >
-              <Plus size={16} />
-              Add Staff
-            </button>
-          ) : null}
+          {selectedIds.size > 0 ? (
+            <div className="flex items-center gap-2 rounded-2xl bg-ip-surface border border-ip-border px-3 py-1.5 shadow-sm ip-fade-in">
+              <span className="text-xs font-medium text-ip-text-secondary">
+                Selected {selectedIds.size} items
+              </span>
+              <div className="h-4 w-[1px] bg-ip-border mx-1" />
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteError('');
+                  const firstId = Array.from(selectedIds)[0];
+                  setStaffToDeleteId(firstId as number);
+                }}
+                className="ip-btn rounded-lg bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
+                title="Delete selected"
+              >
+                <Trash2 size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={clearSelection}
+                className="text-xs font-medium text-ip-primary hover:underline ml-1"
+              >
+                Clear
+              </button>
+            </div>
+          ) : (
+            <>
+              <span className="rounded-full bg-ip-bg px-3 py-1 text-xs text-ip-text-muted">
+                Editable Store
+              </span>
+              {hasAdd ? (
+                <button
+                  type="button"
+                  onClick={openCreateDialog}
+                  className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/25 hover:bg-ip-primary/90"
+                >
+                  <Plus size={16} />
+                  Add Staff
+                </button>
+              ) : null}
+            </>
+          )}
         </div>
       </div>
 
@@ -320,7 +357,8 @@ export default function StaffsPage() {
                             <button
                               type="button"
                               onClick={() => openEditDialog(staff)}
-                              className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-primary hover:bg-ip-primary/10"
+                              disabled={selectedIds.size > 0}
+                              className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-primary hover:bg-ip-primary/10 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                             >
                               <PencilLine size={14} />
                               Edit
@@ -333,7 +371,8 @@ export default function StaffsPage() {
                                 setDeleteError('');
                                 setStaffToDeleteId(staff.id);
                               }}
-                              className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600"
+                              disabled={selectedIds.size > 0}
+                              className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                             >
                               <Trash2 size={14} />
                               Delete
@@ -390,13 +429,18 @@ export default function StaffsPage() {
             {hasEdit && selectedStaff ? (
               <button
                 type="button"
+                disabled={selectedIds.size > 0}
                 onClick={() => {
                   openEditDialog(selectedStaff);
                   setSelectedStaffId(null);
                 }}
-                className="ip-btn rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
+                className={`ip-btn rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                  selectedIds.size > 0
+                    ? 'bg-ip-bg border-ip-border text-ip-text-muted cursor-not-allowed grayscale'
+                    : 'bg-ip-primary text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90'
+                }`}
               >
-                Edit Staff
+                {selectedIds.size > 0 ? 'Edit Disabled' : 'Edit Staff'}
               </button>
             ) : null}
           </div>
@@ -805,16 +849,4 @@ function validateStaffForm(
   }
 
   return null;
-}
-
-function toInputTime(value: string) {
-  return value.slice(0, 5);
-}
-
-function toStoredTime(value: string) {
-  return value.length === 5 ? `${value}:00` : value;
-}
-
-function isObjectName(value: string) {
-  return /^[A-Za-z0-9_]+$/.test(value);
 }

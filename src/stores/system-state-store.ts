@@ -16,6 +16,9 @@ interface SystemStateStore {
   toggleLights: (parkId: number, value: boolean) => void;
   toggleCameras: (parkId: number, value: boolean) => void;
   toggleSensors: (parkId: number, value: boolean) => void;
+  fireAlarms: () => void;
+  openGates: () => void;
+  restartSystem: () => void;
 }
 
 const initialStates: SystemState[] = [
@@ -154,4 +157,25 @@ export const useSystemStateStore = create<SystemStateStore>((set, get) => ({
           : s
       ),
     })),
+
+  fireAlarms: () =>
+    set((state) => ({
+      states: state.states.map((s) => ({
+        ...s,
+        emergency_mode: true,
+        last_modified_at: now(),
+      })),
+    })),
+
+  openGates: () =>
+    set((state) => ({
+      states: state.states.map((s) => ({
+        ...s,
+        last_modified_at: now(),
+      })),
+    })),
+
+  restartSystem: () => {
+    console.log('System restart initiated...');
+  },
 }));

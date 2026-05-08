@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUserStore } from '@/stores/user-store';
+import { useUIStore } from '@/stores/ui-store';
+import { useTranslation } from '@/lib/i18n';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: DashboardIcon },
@@ -17,23 +19,62 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { session, logout } = useAuthStore();
   const { setOnline } = useUserStore();
+  const { t } = useTranslation();
+  const { sidebarCollapsed, toggleSidebar } = useUIStore();
 
   const handleLogout = () => {
     logout(setOnline);
     window.location.href = '/login';
   };
 
+  const navItems = [
+    { href: '/dashboard', label: t('dashboard'), icon: DashboardIcon },
+    { href: '/parks', label: t('parks'), icon: ParkIcon },
+    { href: '/staffs', label: t('staffs'), icon: StaffIcon },
+    { href: '/events', label: t('events'), icon: EventIcon },
+    { href: '/settings', label: t('settings'), icon: SettingsIcon },
+  ];
+
   return (
-    <aside className="ip-sidebar w-64 min-h-screen flex flex-col justify-between p-4">
+    <aside 
+      className={`ip-sidebar flex flex-col justify-between p-4 transition-all duration-300 ease-in-out ${
+        sidebarCollapsed ? 'w-20' : 'w-64'
+      } min-h-screen relative`}
+    >
+      {/* Collapse Toggle Button */}
+      <button
+        onClick={toggleSidebar}
+        className={`absolute -right-4 top-12 flex h-8 w-8 items-center justify-center rounded-2xl border-2 border-white bg-ip-primary text-white shadow-xl transition-all hover:scale-110 active:scale-95 z-[60] ${
+          sidebarCollapsed ? 'translate-x-0' : 'translate-x-0'
+        }`}
+        title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`}
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+
       {/* Logo */}
       <div>
-        <div className="flex items-center gap-3 px-3 py-4 mb-6">
-          <div className="w-9 h-9 rounded-xl bg-ip-primary flex items-center justify-center text-white font-bold text-lg">
+        <div className={`flex items-center gap-3 px-3 py-4 mb-6 ${sidebarCollapsed ? 'justify-center' : ''}`}>
+          <div className="w-9 h-9 min-w-[2.25rem] rounded-xl bg-ip-primary flex items-center justify-center text-white font-bold text-lg">
             P
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">
-            iPark
-          </span>
+          {!sidebarCollapsed && (
+            <span className="text-xl font-bold text-white tracking-tight ip-fade-in">
+              iPark
+            </span>
+          )}
         </div>
 
         {/* Navigation */}
@@ -46,10 +87,11 @@ export default function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`ip-sidebar-link ${isActive ? 'active' : ''}`}
+                title={sidebarCollapsed ? item.label : undefined}
+                className={`ip-sidebar-link ${isActive ? 'active' : ''} ${sidebarCollapsed ? 'justify-center px-0' : ''}`}
               >
                 <Icon />
-                {item.label}
+                {!sidebarCollapsed && <span className="ip-fade-in">{item.label}</span>}
               </Link>
             );
           })}
@@ -58,22 +100,23 @@ export default function Sidebar() {
 
       {/* User Info + Logout */}
       <div className="border-t border-white/10 pt-4 mt-4">
-        {session.user && (
-          <div className="px-3 mb-3">
+        {session.user && !sidebarCollapsed && (
+          <div className="px-3 mb-3 ip-fade-in">
             <p className="text-sm text-white font-medium truncate">
               {session.user.display_name}
             </p>
             <p className="text-xs text-ip-sidebar-text truncate">
-              {session.user.group}
+              {t(session.user.group as any) || session.user.group}
             </p>
           </div>
         )}
         <button
           onClick={handleLogout}
-          className="ip-sidebar-link w-full text-red-400 hover:text-red-300 hover:bg-red-500/10"
+          title={sidebarCollapsed ? t('logout') : undefined}
+          className={`ip-sidebar-link w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 ${sidebarCollapsed ? 'justify-center px-0' : ''}`}
         >
           <LogoutIcon />
-          Logout
+          {!sidebarCollapsed && <span className="ip-fade-in">{t('logout')}</span>}
         </button>
       </div>
     </aside>

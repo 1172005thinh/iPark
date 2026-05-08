@@ -87,6 +87,8 @@ export default function SettingsPage() {
     isSelected,
     allSelected,
     someSelected,
+    selectedIds,
+    clearSelection,
   } = useDataTable({
     data: users,
     initialSortKey: 'id',
@@ -366,19 +368,48 @@ export default function SettingsPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <span className="flex items-center rounded-full bg-ip-bg px-3 py-1 text-xs text-ip-text-muted">
-                Live user store
-              </span>
-              {hasEdit ? (
-                <button
-                  type="button"
-                  onClick={openCreateDialog}
-                  className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
-                >
-                  <Plus size={14} />
-                  Add User
-                </button>
-              ) : null}
+              {selectedIds.size > 0 ? (
+                <div className="flex items-center gap-2 rounded-2xl bg-ip-surface border border-ip-border px-3 py-1.5 shadow-sm ip-fade-in">
+                  <span className="text-xs font-medium text-ip-text-secondary">
+                    Selected {selectedIds.size} items
+                  </span>
+                  <div className="h-4 w-[1px] bg-ip-border mx-1" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const firstId = Array.from(selectedIds)[0];
+                      setUserToDeleteId(firstId as number);
+                    }}
+                    className="ip-btn rounded-lg bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
+                    title="Delete selected"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={clearSelection}
+                    className="text-xs font-medium text-ip-primary hover:underline ml-1"
+                  >
+                    Clear
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <span className="flex items-center rounded-full bg-ip-bg px-3 py-1 text-xs text-ip-text-muted">
+                    Live user store
+                  </span>
+                  {hasEdit ? (
+                    <button
+                      type="button"
+                      onClick={openCreateDialog}
+                      className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
+                    >
+                      <Plus size={14} />
+                      Add User
+                    </button>
+                  ) : null}
+                </>
+              )}
             </div>
           </div>
 
@@ -493,7 +524,8 @@ export default function SettingsPage() {
                           <button
                             type="button"
                             onClick={() => openEditDialog(user)}
-                            className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-primary hover:bg-ip-primary/10"
+                            disabled={selectedIds.size > 0}
+                            className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-primary hover:bg-ip-primary/10 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                           >
                             <PencilLine size={14} />
                             Edit
@@ -501,7 +533,8 @@ export default function SettingsPage() {
                           <button
                             type="button"
                             onClick={() => setUserToDeleteId(user.id)}
-                            className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600"
+                            disabled={selectedIds.size > 0}
+                            className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                           >
                             <Trash2 size={14} />
                             Delete
