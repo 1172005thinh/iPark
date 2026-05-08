@@ -8,6 +8,10 @@ import { useAuthStore } from '@/stores/auth-store';
 export default function StaffsPage() {
   const { session } = useAuthStore();
   const hasView = session.permissions.includes('view_staffs');
+  const hasEdit = session.permissions.includes('edit_staffs');
+  const hasAdd = session.permissions.includes('add_staffs');
+  const hasDelete = session.permissions.includes('delete_staffs');
+
   const [sortKey, setSortKey] = useState<string>('id');
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -59,6 +63,8 @@ export default function StaffsPage() {
     { key: 'is_on_shift', label: 'On Shift' },
   ];
 
+  const showActions = hasView || hasEdit || hasDelete;
+
   return (
     <div className="ip-fade-in">
       <div className="flex items-center justify-between mb-6">
@@ -68,9 +74,19 @@ export default function StaffsPage() {
             {STAFF_DB.length} staff members registered in the system
           </p>
         </div>
-        <span className="text-xs text-ip-text-muted px-3 py-1 bg-ip-bg rounded-full">
-          Read-only mock
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-ip-text-muted px-3 py-1 bg-ip-bg rounded-full">
+            Read-only mock
+          </span>
+          {hasAdd && (
+            <button
+              onClick={() => alert('Mock: Add new staff dialog would open here')}
+              className="px-4 py-2 bg-ip-primary hover:bg-ip-primary/90 text-white text-sm font-semibold rounded-lg transition-colors shadow-lg shadow-ip-primary/30"
+            >
+              + Add Staff
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="ip-card overflow-hidden">
@@ -94,6 +110,11 @@ export default function StaffsPage() {
                     </span>
                   </th>
                 ))}
+                {showActions && (
+                  <th className="px-5 py-3.5 text-right font-semibold text-ip-text-secondary">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -119,6 +140,40 @@ export default function StaffsPage() {
                   <td className="px-5 py-3.5">
                     <StatusBadge active={staff.is_on_shift} />
                   </td>
+                  {showActions && (
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {hasView && (
+                          <button
+                            onClick={() => alert(`Mock: View details for staff ${staff.id}`)}
+                            className="text-ip-text-secondary hover:text-ip-text transition-colors text-xs font-medium"
+                          >
+                            View
+                          </button>
+                        )}
+                        {hasEdit && (
+                          <button
+                            onClick={() => alert(`Mock: Edit staff ${staff.id}`)}
+                            className="text-ip-primary hover:text-ip-primary/80 transition-colors text-xs font-medium px-2 border-l border-ip-border"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        {hasDelete && (
+                          <button
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to delete staff ${staff.id}?`)) {
+                                alert(`Mock: Delete staff ${staff.id}`);
+                              }
+                            }}
+                            className="text-red-500 hover:text-red-600 transition-colors text-xs font-medium pl-2 border-l border-ip-border"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

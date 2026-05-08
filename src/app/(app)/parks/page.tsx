@@ -7,6 +7,10 @@ import { useAuthStore } from '@/stores/auth-store';
 export default function ParksPage() {
   const { session } = useAuthStore();
   const hasView = session.permissions.includes('view_parks');
+  const hasEdit = session.permissions.includes('edit_parks');
+  const hasAdd = session.permissions.includes('add_parks');
+  const hasDelete = session.permissions.includes('delete_parks');
+
   const [sortKey, setSortKey] = useState<string>('id');
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -53,6 +57,8 @@ export default function ParksPage() {
     { key: 'is_operating', label: 'Operating' },
   ];
 
+  const showActions = hasView || hasEdit || hasDelete;
+
   return (
     <div className="ip-fade-in">
       <div className="flex items-center justify-between mb-6">
@@ -62,10 +68,18 @@ export default function ParksPage() {
             {PARK_DB.length} parks registered in the system
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <span className="text-xs text-ip-text-muted px-3 py-1 bg-ip-bg rounded-full">
             Read-only mock
           </span>
+          {hasAdd && (
+            <button
+              onClick={() => alert('Mock: Add new park dialog would open here')}
+              className="px-4 py-2 bg-ip-primary hover:bg-ip-primary/90 text-white text-sm font-semibold rounded-lg transition-colors shadow-lg shadow-ip-primary/30"
+            >
+              + Add Park
+            </button>
+          )}
         </div>
       </div>
 
@@ -90,6 +104,11 @@ export default function ParksPage() {
                     </span>
                   </th>
                 ))}
+                {showActions && (
+                  <th className="px-5 py-3.5 text-right font-semibold text-ip-text-secondary">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -115,6 +134,40 @@ export default function ParksPage() {
                   <td className="px-5 py-3.5">
                     <StatusBadge active={park.is_operating} />
                   </td>
+                  {showActions && (
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {hasView && (
+                          <button
+                            onClick={() => alert(`Mock: View details for park ${park.id}`)}
+                            className="text-ip-text-secondary hover:text-ip-text transition-colors text-xs font-medium"
+                          >
+                            View
+                          </button>
+                        )}
+                        {hasEdit && (
+                          <button
+                            onClick={() => alert(`Mock: Edit park ${park.id}`)}
+                            className="text-ip-primary hover:text-ip-primary/80 transition-colors text-xs font-medium px-2 border-l border-ip-border"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        {hasDelete && (
+                          <button
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to delete park ${park.id}?`)) {
+                                alert(`Mock: Delete park ${park.id}`);
+                              }
+                            }}
+                            className="text-red-500 hover:text-red-600 transition-colors text-xs font-medium pl-2 border-l border-ip-border"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

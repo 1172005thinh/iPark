@@ -7,8 +7,11 @@ import { PARK_DB } from '@/data/mock-parks';
 
 export default function EventsPage() {
   const { session } = useAuthStore();
-  const { events, acknowledgeEvent } = useEventHistoryStore();
+  const { events, acknowledgeEvent, deleteEvent } = useEventHistoryStore();
   const hasView = session.permissions.includes('view_events');
+  const hasExport = session.permissions.includes('export_events');
+  const hasDelete = session.permissions.includes('delete_events');
+
   const [sortKey, setSortKey] = useState<string>('id');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -37,6 +40,14 @@ export default function EventsPage() {
     acknowledgeEvent(id);
   };
 
+  const handleDelete = (id: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (confirm(`Are you sure you want to delete event ${id}?`)) {
+      deleteEvent(id);
+      if (selectedId === id) setSelectedId(null);
+    }
+  };
+
   const sorted = [...events].sort((a, b) => {
     const av = (a as unknown as Record<string, unknown>)[sortKey];
     const bv = (b as unknown as Record<string, unknown>)[sortKey];
@@ -56,6 +67,7 @@ export default function EventsPage() {
   };
 
   const selected = events.find((e) => e.id === selectedId);
+  const showActions = hasDelete;
 
   return (
     <div className="ip-fade-in">
@@ -65,6 +77,16 @@ export default function EventsPage() {
           <p className="text-sm text-ip-text-secondary mt-1">
             {events.length} events — {events.filter((e) => !e.is_acknowledged).length} unacknowledged
           </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {hasExport && (
+            <button
+              onClick={() => alert('Mock: Exporting events to CSV...')}
+              className="px-4 py-2 bg-ip-surface-hover hover:bg-ip-border/50 text-ip-text text-sm font-semibold rounded-lg transition-colors border border-ip-border"
+            >
+              Export CSV
+            </button>
+          )}
         </div>
       </div>
 
@@ -78,6 +100,11 @@ export default function EventsPage() {
                     <span className="flex items-center gap-1">{c.label}{sortKey === c.key && <span className="text-ip-primary">{sortAsc ? '↑' : '↓'}</span>}</span>
                   </th>
                 ))}
+                {showActions && (
+                  <th className="px-5 py-3.5 text-right font-semibold text-ip-text-secondary">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -90,6 +117,20 @@ export default function EventsPage() {
                   <td className="px-5 py-3.5 text-ip-text-secondary">{parkMap[ev.at_park_id] || `#${ev.at_park_id}`}</td>
                   <td className="px-5 py-3.5 text-ip-text-secondary text-xs">{ev.received_time}</td>
                   <td className="px-5 py-3.5">{ev.is_acknowledged ? <span className="text-green-500">✓</span> : <span className="text-ip-text-muted">—</span>}</td>
+                  {showActions && (
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {hasDelete && (
+                          <button
+                            onClick={(e) => handleDelete(ev.id, e)}
+                            className="text-red-500 hover:text-red-600 transition-colors text-xs font-medium"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -101,7 +142,17 @@ export default function EventsPage() {
         <div className="ip-card p-6 mt-4 ip-fade-in">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-ip-text">Event Detail</h3>
-            <button onClick={() => setSelectedId(null)} className="text-ip-text-muted hover:text-ip-text">✕</button>
+            <div className="flex items-center gap-3">
+              {hasDelete && (
+                <button
+                  onClick={() => handleDelete(selected.id)}
+                  className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded transition-colors"
+                >
+                  Delete Event
+                </button>
+              )}
+              <button onClick={() => setSelectedId(null)} className="text-ip-text-muted hover:text-ip-text">✕</button>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div><span className="text-ip-text-muted text-xs block mb-0.5">Name</span><span className="text-ip-text">{selected.event_name}</span></div>

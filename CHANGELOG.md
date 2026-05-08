@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## [0.4.0] — 2026-05-08 — Phase 4: Entity Management Views
+
+### Summary
+
+Completed **Phase 4** — implemented the Entity Management Views for Parks, Staffs, and Events, integrating standard quick actions with permission-based conditional rendering.
+
+### Added
+
+- **Parks View (`/parks`)**:
+  - Added conditional standard quick actions column.
+  - Implemented Add (top-level), View, Edit, and Delete action buttons per row.
+  - Action visibility is strictly controlled by `add_parks`, `view_parks`, `edit_parks`, and `delete_parks` permissions from the active user's `GROUP_DB`.
+- **Staffs View (`/staffs`)**:
+  - Added conditional standard quick actions column.
+  - Implemented Add (top-level), View, Edit, and Delete action buttons per row.
+  - Action visibility is strictly controlled by `add_staffs`, `view_staffs`, `edit_staffs`, and `delete_staffs` permissions.
+- **Events View (`/events`)**:
+  - Enhanced the existing table with a conditional Export CSV button at the top (requires `export_events` permission).
+  - Added a conditional Actions column with a Delete button per row and inside the Event Detail view (requires `delete_events` permission).
+  - The Delete action correctly mutates the `EVENT_HISTORY_DB` Zustand store.
+
+---
+
 ## [0.3.1] — 2026-05-07 — Phase 3 Verification & Datasource Compliance
 
 ### Summary

@@ -1,10 +1,13 @@
 'use client';
 
 import { useAuthStore } from '@/stores/auth-store';
+import { useUserStore } from '@/stores/user-store';
 
 export default function SettingsPage() {
   const { session } = useAuthStore();
   const hasView = session.permissions.includes('view_settings');
+  const hasEdit = session.permissions.includes('edit_settings');
+  const { users, enableUser, disableUser, setOnline, updateUser, deleteUser } = useUserStore();
 
   if (!hasView) {
     return (
@@ -57,15 +60,97 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Account Management Placeholder */}
+        {/* Account Management Table */}
         <div className="ip-card p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-ip-text">Account Management</h2>
-            <span className="text-xs text-ip-text-muted px-3 py-1 bg-ip-bg rounded-full">Phase 5</span>
+            <div className="flex gap-2">
+              <span className="text-xs text-ip-text-muted px-3 py-1 bg-ip-bg rounded-full flex items-center">
+                Editable Store
+              </span>
+              {hasEdit && (
+                <button
+                  onClick={() => alert('Mock: Add new user dialog would appear here')}
+                  className="px-3 py-1 bg-ip-primary hover:bg-ip-primary/90 text-white text-xs font-semibold rounded transition-colors"
+                >
+                  + Add User
+                </button>
+              )}
+            </div>
           </div>
-          <p className="text-sm text-ip-text-secondary">
-            User account table and management actions will be implemented in Phase 5.
-          </p>
+          <div className="overflow-x-auto border border-ip-border rounded-lg">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-ip-bg/50 border-b border-ip-border text-ip-text-secondary">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">ID</th>
+                  <th className="px-4 py-3 font-semibold">Username</th>
+                  <th className="px-4 py-3 font-semibold">Email</th>
+                  <th className="px-4 py-3 font-semibold">Group</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Online</th>
+                  {hasEdit && <th className="px-4 py-3 font-semibold text-right">Actions</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id} className="border-b border-ip-border last:border-0 hover:bg-ip-surface-hover">
+                    <td className="px-4 py-3 font-mono text-xs">{u.id}</td>
+                    <td className="px-4 py-3 font-medium text-ip-text">{u.user_name}</td>
+                    <td className="px-4 py-3 text-ip-text-secondary">{u.email}</td>
+                    <td className="px-4 py-3"><span className="text-xs font-mono bg-ip-bg px-2 py-1 rounded">{u.group}</span></td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => {
+                          if (!hasEdit) return;
+                          if (u.is_enable) {
+                            if (confirm(`Disable user ${u.user_name}?`)) disableUser(u.id);
+                          } else {
+                            if (confirm(`Enable user ${u.user_name}?`)) enableUser(u.id);
+                          }
+                        }}
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${u.is_enable ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'} ${hasEdit ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
+                        title={hasEdit ? "Click to toggle" : ""}
+                      >
+                        {u.is_enable ? 'Enabled' : 'Disabled'}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${u.is_online ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+                        {u.is_online ? 'Online' : 'Offline'}
+                      </span>
+                    </td>
+                    {hasEdit && (
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2 text-xs">
+                          {u.is_online && (
+                            <button onClick={() => { if(confirm(`Revoke session for ${u.user_name}?`)) setOnline(u.id, false); }} className="text-ip-warning hover:text-ip-warning/80">Revoke</button>
+                          )}
+                          <button
+                            onClick={() => {
+                              if (session.user?.group === 'admins' || session.user?.id === u.id) {
+                                const newPassword = prompt(`Enter new password for ${u.user_name}:`, u.password);
+                                if (newPassword && newPassword !== u.password) updateUser(u.id, { password: newPassword });
+                              } else {
+                                alert("You can only edit your own password.");
+                              }
+                              if (session.user?.id === u.id) {
+                                const newEmail = prompt(`Enter new email for ${u.user_name}:`, u.email);
+                                if (newEmail && newEmail !== u.email) updateUser(u.id, { email: newEmail });
+                              }
+                            }}
+                            className="text-ip-primary hover:text-ip-primary/80"
+                          >
+                            Edit
+                          </button>
+                          <button onClick={() => { if(confirm(`Delete user ${u.user_name}?`)) deleteUser(u.id); }} className="text-red-500 hover:text-red-600">Delete</button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

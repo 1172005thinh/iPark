@@ -61,10 +61,14 @@ export function ActionWidgets({ ds }: { ds: ActionDataSource }) {
         isOn = globalState?.maintenance_mode ?? false;
         label = 'Maintenance Mode';
         handleToggle = (val) => {
-          if (!val || window.confirm('Enable maintenance mode? All non-admin users will be logged out.')) {
-            if (val || window.confirm('Disable maintenance mode? (Admin password: Admin@123)')) {
+          if (val) {
+            if (window.confirm('Enable maintenance mode? All non-admin users will be logged out.')) {
               toggleMaintenanceMode(val);
             }
+          } else {
+            const pwd = window.prompt('Disable maintenance mode? (Admin password: Admin@123)');
+            if (pwd === 'Admin@123') toggleMaintenanceMode(val);
+            else if (pwd !== null) alert('Incorrect password.');
           }
         };
         break;
@@ -72,10 +76,12 @@ export function ActionWidgets({ ds }: { ds: ActionDataSource }) {
         isOn = globalState?.emergency_mode ?? false;
         label = 'Emergency Mode';
         handleToggle = (val) => {
-          if (!val || window.confirm('⚠️ Enable EMERGENCY mode? All alarms will activate!')) {
-            if (val || window.confirm('Disable emergency mode? (Admin password: Admin@123)')) {
-              toggleEmergencyMode(val);
-            }
+          if (val) {
+            if (window.confirm('⚠️ Enable EMERGENCY mode? All alarms will activate!')) toggleEmergencyMode(val);
+          } else {
+            const pwd = window.prompt('Disable emergency mode? (Admin password: Admin@123)');
+            if (pwd === 'Admin@123') toggleEmergencyMode(val);
+            else if (pwd !== null) alert('Incorrect password.');
           }
         };
         break;
@@ -88,7 +94,11 @@ export function ActionWidgets({ ds }: { ds: ActionDataSource }) {
         isOn = parkState?.cameras_on ?? false;
         label = 'Cameras';
         handleToggle = (val) => {
-          if (val || window.confirm('Turn OFF cameras? (Admin password: Admin@123)')) {
+          if (!val) {
+            const pwd = window.prompt('Turn OFF cameras? (Admin password: Admin@123)');
+            if (pwd === 'Admin@123') toggleCameras(parkId, val);
+            else if (pwd !== null) alert('Incorrect password.');
+          } else {
             toggleCameras(parkId, val);
           }
         };
@@ -97,7 +107,11 @@ export function ActionWidgets({ ds }: { ds: ActionDataSource }) {
         isOn = parkState?.sensors_on ?? false;
         label = 'Sensors';
         handleToggle = (val) => {
-          if (val || window.confirm('Turn OFF sensors? (Admin password: Admin@123)')) {
+          if (!val) {
+            const pwd = window.prompt('Turn OFF sensors? (Admin password: Admin@123)');
+            if (pwd === 'Admin@123') toggleSensors(parkId, val);
+            else if (pwd !== null) alert('Incorrect password.');
+          } else {
             toggleSensors(parkId, val);
           }
         };
