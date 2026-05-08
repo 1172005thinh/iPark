@@ -35,27 +35,20 @@ Build the iPark Smart Parking Management System frontend (Next.js/React + Tailwi
 18. Connect Account Management table to mutable `USER_DB` (handling password/email edits, add/delete, enable/disable). (DONE)
 19. Hook `SYSTEM_STATE_DB` mutators to ACTION/SWITCH widgets (e.g. toggling maintenance mode and prompting for admin password). (DONE)
 
-**Phase 6: Advanced Table Features & System Polish**
-20. **Unified Event Detail View**: Update the Events table to use `AppDialog` for viewing event details, matching the Parks and Staffs UX. (DONE)
-21. **Login UX Improvement**: Implement `autoFocus` on the username field in the login page for immediate user interaction. (DONE)
-22. **Reusable Pagination System**: Implement a `Pagination` component for all tables. (DONE)
-23. **Table Selection Mode**: Add multi-selection support to all tables. (DONE)
-24. **In-App Push Notifications**: Implement a global notification system. (DONE)
-25. **Real-time Personalization**: Finalize global Theme and Language switching. (DONE)
+**Phase 7: UI/UX Finalization & Branding**
+26. **Branding Alignment**: Replace generic placeholder logos with project-specific iPark logo asset across Login and Sidebar. (DONE)
+27. **Iconic Settings**: Add visual anchors (icons) to all sections in the Settings page for improved scannability. (DONE)
+28. **Robust Bulk Actions**: Replace native browser `confirm()` with a themed `ConfirmDialog` for bulk deletions. (DONE)
+29. **About & Metadata**: Implement an "About" section in Settings to track build versions and developer credits. (DONE)
+30. **Password Security UX**: Add hide/show toggles to all password input fields. (DONE)
 
 **Verification**
-1. Attempt login with invalid credentials 5 times to verify the lockout and event logging logic. (VERIFIED)
-2. Login as a limited user and verify access checks for "Edit Dashboard" or specific table modifications. (VERIFIED)
-3. Toggle "System Maintenance Mode" via widget and verify broadcast warnings and non-admin kick logic. (VERIFIED)
-4. Validate widget data formatting (ensure `money` is divided by 1000, `pos_int` constraints, etc.). (VERIFIED)
-5. Verify disabled entity cascading (disabling a user logs them out, disabling a park hides it from assignments). (VERIFIED)
-6. Verify pagination and multi-selection across all management tables. (VERIFIED)
-7. Verify real-time theme and language switching from the Settings page. (VERIFIED)
-8. Verify in-app notifications appear instantly when a system event occurs. (VERIFIED)
+...
+9. Verify branding consistency across all entry points and navigation menus. (VERIFIED)
+10. Confirm bulk actions trigger the custom themed dialog instead of browser defaults. (VERIFIED)
+11. Validate password toggle functionality in both Login and Settings forms. (VERIFIED)
 
 **Decisions**
-- Implemented entirely client-side using React Context/Zustand simulating a backend.
-- UI styling will lean heavily on Tailwind CSS using extensive border-radius utilities to hit the "modern curve shapes" requirement.
-- Complex charting widgets will utilize placeholder libraries (like Recharts) populated with mocked mathematical aggregations based on the specified interval.
-- **Pagination Strategy**: Client-side pagination based on the local Zustand store state.
-- **Notification Implementation**: Use a custom `NotificationProvider` or Zustand-based toast queue.
+...
+- **Branding Strategy**: Centralized logo assets in `public/` for consistent reference across Next.js metadata and React components.
+- **Dialog System**: Programmatic control of `ConfirmDialog` via state instead of blocking window calls.

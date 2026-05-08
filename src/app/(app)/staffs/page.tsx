@@ -22,6 +22,7 @@ import {
   toInputTime,
   toStoredTime,
 } from '@/lib/ipark-utils';
+import { useTranslation } from '@/lib/i18n';
 
 type StaffFormState = {
   staff_name: string;
@@ -40,6 +41,7 @@ export default function StaffsPage() {
   const { session } = useAuthStore();
   const { parks } = useParkStore();
   const { staffs, addStaff, updateStaff, deleteStaff } = useStaffStore();
+  const { t } = useTranslation();
   const hasView = session.permissions.includes('view_staffs');
   const hasEdit = session.permissions.includes('edit_staffs');
   const hasAdd = session.permissions.includes('add_staffs');
@@ -89,9 +91,9 @@ export default function StaffsPage() {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <div className="ip-card max-w-md p-8 text-center">
-          <h2 className="mb-2 text-lg font-bold text-ip-text">Access Denied</h2>
+          <h2 className="mb-2 text-lg font-bold text-ip-text">{t('access_denied')}</h2>
           <p className="text-sm text-ip-text-secondary">
-            You do not have permission to view staffs.
+            {t('no_permission_view')}
           </p>
         </div>
       </div>
@@ -228,18 +230,19 @@ export default function StaffsPage() {
           {selectedIds.size > 0 ? (
             <div className="flex items-center gap-2 rounded-2xl bg-ip-surface border border-ip-border px-3 py-1.5 shadow-sm ip-fade-in">
               <span className="text-xs font-medium text-ip-text-secondary">
-                Selected {selectedIds.size} items
+                {t('selected')} {selectedIds.size} {t('items')}
               </span>
               <div className="h-4 w-[1px] bg-ip-border mx-1" />
               <button
                 type="button"
                 onClick={() => {
-                  setDeleteError('');
-                  const firstId = Array.from(selectedIds)[0];
-                  setStaffToDeleteId(firstId as number);
+                  if (confirm(t('bulk_delete_confirm').replace('{count}', String(selectedIds.size)))) {
+                    selectedIds.forEach(id => deleteStaff(id as number));
+                    clearSelection();
+                  }
                 }}
                 className="ip-btn rounded-lg bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
-                title="Delete selected"
+                title={t('delete')}
               >
                 <Trash2 size={16} />
               </button>
@@ -248,7 +251,7 @@ export default function StaffsPage() {
                 onClick={clearSelection}
                 className="text-xs font-medium text-ip-primary hover:underline ml-1"
               >
-                Clear
+                {t('clear')}
               </button>
             </div>
           ) : (

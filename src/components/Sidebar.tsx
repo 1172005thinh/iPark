@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUserStore } from '@/stores/user-store';
@@ -67,8 +68,13 @@ export default function Sidebar() {
       {/* Logo */}
       <div>
         <div className={`flex items-center gap-3 px-3 py-4 mb-6 ${sidebarCollapsed ? 'justify-center' : ''}`}>
-          <div className="w-9 h-9 min-w-[2.25rem] rounded-xl bg-ip-primary flex items-center justify-center text-white font-bold text-lg">
-            P
+          <div className="relative w-9 h-9 min-w-[2.25rem] rounded-xl overflow-hidden shadow-lg bg-white/10 flex items-center justify-center">
+            <Image 
+              src="/logo.ico" 
+              alt="iPark Logo" 
+              fill 
+              className="object-contain p-1"
+            />
           </div>
           {!sidebarCollapsed && (
             <span className="text-xl font-bold text-white tracking-tight ip-fade-in">

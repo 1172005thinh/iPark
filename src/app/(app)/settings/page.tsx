@@ -6,23 +6,33 @@ import { useShallow } from 'zustand/react/shallow';
 import {
   Bell,
   Eye,
+  EyeOff,
+  Code,
+  Globe,
+  Heart,
+  HelpCircle,
+  Info,
   LockKeyhole,
+  Palette,
   PencilLine,
   Plus,
   ShieldUser,
   Trash2,
   UserRoundCheck,
   UserRoundX,
+  Users,
 } from 'lucide-react';
+import Link from 'next/link';
 import { AppDialog } from '@/components/dialogs/AppDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
 import { useAuthStore } from '@/stores/auth-store';
 import { useDashboardStore } from '@/stores/dashboard-store';
 import { useGroupStore } from '@/stores/group-store';
 import { useUserStore } from '@/stores/user-store';
-import type { User } from '@/types/database';
 import { useDataTable } from '@/hooks/useDataTable';
 import { Pagination } from '@/components/shared/Pagination';
+import { useTranslation } from '@/lib/i18n';
+import type { User } from '@/types/database';
 
 type NotificationSettings = {
   notificationsEnabled: boolean;
@@ -65,6 +75,8 @@ export default function SettingsPage() {
     updateUser,
     deleteUser,
   } = useUserStore();
+  const { t } = useTranslation();
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   const [notifications, setNotifications] = useState<NotificationSettings>({
     notificationsEnabled: true,
@@ -88,6 +100,7 @@ export default function SettingsPage() {
     allSelected,
     someSelected,
     selectedIds,
+    isSelectionMode,
     clearSelection,
   } = useDataTable({
     data: users,
@@ -98,6 +111,7 @@ export default function SettingsPage() {
   const [userToToggleStatusId, setUserToToggleStatusId] = useState<number | null>(null);
   const [userToRevokeId, setUserToRevokeId] = useState<number | null>(null);
   const [userToDeleteId, setUserToDeleteId] = useState<number | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [formDialog, setFormDialog] = useState<{
     mode: 'create' | 'edit';
     userId?: number;
@@ -126,9 +140,9 @@ export default function SettingsPage() {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <div className="ip-card max-w-md p-8 text-center">
-          <h2 className="mb-2 text-lg font-bold text-ip-text">Access Denied</h2>
+          <h2 className="mb-2 text-lg font-bold text-ip-text">{t('access_denied')}</h2>
           <p className="text-sm text-ip-text-secondary">
-            You do not have permission to view settings.
+            {t('no_permission_view')}
           </p>
         </div>
       </div>
@@ -252,9 +266,9 @@ export default function SettingsPage() {
     return (
       <div className="ip-fade-in">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-ip-text">Settings</h1>
+        <h1 className="text-2xl font-bold text-ip-text">{t('settings')}</h1>
         <p className="mt-1 text-sm text-ip-text-secondary">
-          System configuration and account management
+          {t('loading' as any) === 'Loading...' ? 'System configuration and account management' : 'Cấu hình hệ thống và quản lý tài khoản'}
         </p>
       </div>
 
@@ -265,30 +279,30 @@ export default function SettingsPage() {
               <Bell size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-ip-text">Notifications</h2>
+              <h2 className="text-lg font-semibold text-ip-text">{t('notifications')}</h2>
               <p className="text-sm text-ip-text-secondary">
-                Live demo toggles for alert delivery preferences.
+                {t('loading' as any) === 'Loading...' ? 'Live demo toggles for alert delivery preferences.' : 'Các tùy chọn nhận thông báo cho bản demo.'}
               </p>
             </div>
           </div>
           <div className="space-y-4">
             <SettingRow
-              label="Enable Notifications"
-              sublabel="Master toggle for all notification channels."
+              label={t('loading' as any) === 'Loading...' ? 'Enable Notifications' : 'Bật thông báo'}
+              sublabel={t('loading' as any) === 'Loading...' ? 'Master toggle for all notification channels.' : 'Công tắc tổng cho tất cả các kênh thông báo.'}
               checked={notifications.notificationsEnabled}
               onToggle={() => handleNotificationToggle('notificationsEnabled')}
               disabled={!hasEdit}
             />
             <SettingRow
-              label="In-App Push Notifications"
-              sublabel="Receive push notifications within the app."
+              label={t('loading' as any) === 'Loading...' ? 'In-App Push Notifications' : 'Thông báo đẩy trong ứng dụng'}
+              sublabel={t('loading' as any) === 'Loading...' ? 'Receive push notifications within the app.' : 'Nhận thông báo đẩy ngay trong giao diện ứng dụng.'}
               checked={notifications.inAppEnabled}
               onToggle={() => handleNotificationToggle('inAppEnabled')}
               disabled={!hasEdit || !notifications.notificationsEnabled}
             />
             <SettingRow
-              label="Email Notifications"
-              sublabel="Receive event notifications via email."
+              label={t('loading' as any) === 'Loading...' ? 'Email Notifications' : 'Thông báo qua Email'}
+              sublabel={t('loading' as any) === 'Loading...' ? 'Receive event notifications via email.' : 'Nhận thông báo sự kiện qua địa chỉ email.'}
               checked={notifications.emailEnabled}
               onToggle={() => handleNotificationToggle('emailEnabled')}
               disabled={!hasEdit || !notifications.notificationsEnabled}
@@ -297,15 +311,25 @@ export default function SettingsPage() {
         </div>
 
         <div className="ip-card rounded-[2rem] p-6">
-          <h2 className="mb-4 text-lg font-semibold text-ip-text">Language & Theme</h2>
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-200 bg-indigo-50 text-indigo-700">
+              <Palette size={20} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-ip-text">{t('language')} & {t('theme')}</h2>
+              <p className="text-sm text-ip-text-secondary">
+                {t('loading' as any) === 'Loading...' ? 'Personalize your interface experience.' : 'Cá nhân hóa trải nghiệm giao diện của bạn.'}
+              </p>
+            </div>
+          </div>
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
               <span className="mb-2 block text-sm text-ip-text-secondary">
-                Language
+                {t('language')}
               </span>
               <div className="flex flex-wrap gap-3">
                 <RadioPill
-                  label="English"
+                  label={t('english')}
                   checked={currentUser?.language === 'English'}
                   disabled={!currentUser}
                   onClick={() =>
@@ -313,7 +337,7 @@ export default function SettingsPage() {
                   }
                 />
                 <RadioPill
-                  label="Vietnamese"
+                  label={t('vietnamese')}
                   checked={currentUser?.language === 'Vietnamese'}
                   disabled={!currentUser}
                   onClick={() =>
@@ -325,11 +349,11 @@ export default function SettingsPage() {
             </div>
             <div>
               <span className="mb-2 block text-sm text-ip-text-secondary">
-                Theme
+                {t('theme')}
               </span>
               <div className="flex flex-wrap gap-3">
                 <RadioPill
-                  label="Light"
+                  label={t('light')}
                   checked={currentUser?.theme === 'Light'}
                   disabled={!currentUser}
                   onClick={() =>
@@ -337,7 +361,7 @@ export default function SettingsPage() {
                   }
                 />
                 <RadioPill
-                  label="Dark"
+                  label={t('dark')}
                   checked={currentUser?.theme === 'Dark'}
                   disabled={!currentUser}
                   onClick={() =>
@@ -345,7 +369,7 @@ export default function SettingsPage() {
                   }
                 />
                 <RadioPill
-                  label="System"
+                  label={t('system')}
                   checked={currentUser?.theme === 'System'}
                   disabled={!currentUser}
                   onClick={() =>
@@ -358,30 +382,33 @@ export default function SettingsPage() {
         </div>
 
         <div className="ip-card rounded-[2rem] p-6">
-          <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-700">
+              <Users size={20} />
+            </div>
             <div>
               <h2 className="text-lg font-semibold text-ip-text">
-                Account Management
+                {t('loading' as any) === 'Loading...' ? 'Account Management' : 'Quản lý tài khoản'}
               </h2>
               <p className="mt-1 text-sm text-ip-text-secondary">
-                Live user store with admin-facing dialogs for account actions.
+                {t('loading' as any) === 'Loading...' ? 'Live user store with admin-facing dialogs for account actions.' : 'Danh sách người dùng với các thao tác quản trị.'}
               </p>
             </div>
+          </div>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-4">
+            <div />
             <div className="flex flex-wrap gap-2">
               {selectedIds.size > 0 ? (
                 <div className="flex items-center gap-2 rounded-2xl bg-ip-surface border border-ip-border px-3 py-1.5 shadow-sm ip-fade-in">
                   <span className="text-xs font-medium text-ip-text-secondary">
-                    Selected {selectedIds.size} items
+                    {t('selected')} {selectedIds.size} {t('items')}
                   </span>
                   <div className="h-4 w-[1px] bg-ip-border mx-1" />
                   <button
                     type="button"
-                    onClick={() => {
-                      const firstId = Array.from(selectedIds)[0];
-                      setUserToDeleteId(firstId as number);
-                    }}
+                    onClick={() => setShowBulkDeleteConfirm(true)}
                     className="ip-btn rounded-lg bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
-                    title="Delete selected"
+                    title={t('delete')}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -390,13 +417,13 @@ export default function SettingsPage() {
                     onClick={clearSelection}
                     className="text-xs font-medium text-ip-primary hover:underline ml-1"
                   >
-                    Clear
+                    {t('clear')}
                   </button>
                 </div>
               ) : (
                 <>
                   <span className="flex items-center rounded-full bg-ip-bg px-3 py-1 text-xs text-ip-text-muted">
-                    Live user store
+                    {t('loading' as any) === 'Loading...' ? 'Live user store' : 'Danh sách người dùng'}
                   </span>
                   {hasEdit ? (
                     <button
@@ -405,7 +432,7 @@ export default function SettingsPage() {
                       className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
                     >
                       <Plus size={14} />
-                      Add User
+                      {t('add')} {t('user' as any)}
                     </button>
                   ) : null}
                 </>
@@ -429,12 +456,12 @@ export default function SettingsPage() {
                     />
                   </th>
                   {[
-                    { key: 'id', label: 'ID' },
-                    { key: 'user_name', label: 'Username' },
-                    { key: 'email', label: 'Email' },
-                    { key: 'group', label: 'Group' },
-                    { key: 'is_enable', label: 'Status' },
-                    { key: 'is_online', label: 'Online' },
+                    { key: 'id', label: t('id') },
+                    { key: 'user_name', label: t('username') },
+                    { key: 'email', label: t('email') },
+                    { key: 'group', label: t('group') },
+                    { key: 'is_enable', label: t('status') },
+                    { key: 'is_online', label: t('online') },
                   ].map((column) => (
                     <th
                       key={column.key}
@@ -556,7 +583,74 @@ export default function SettingsPage() {
             onPageSizeChange={handlePageSizeChange}
           />
         </div>
+
+        {/* About Section */}
+        <div className="ip-card rounded-[2rem] p-6">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-purple-200 bg-purple-50 text-purple-700">
+              <Info size={20} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-ip-text">About iPark</h2>
+              <p className="text-sm text-ip-text-secondary">
+                System version and developer information.
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-x-12 gap-y-2 md:grid-cols-2">
+            <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
+              <span className="text-sm text-ip-text-secondary">Version</span>
+              <span className="text-sm font-medium text-ip-text">v1.2.5 (Stable)</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
+              <span className="text-sm text-ip-text-secondary">Release Type</span>
+              <span className="text-sm font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border border-amber-100">
+                DEMO Release
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
+              <span className="text-sm text-ip-text-secondary">Developers</span>
+              <span className="text-sm font-medium text-ip-text text-right">TICSMTC - HCMUT 3rd CSE Group</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
+              <span className="text-sm text-ip-text-secondary">Source Code</span>
+              <Link 
+                href="https://github.com/1172005thinh/iPark" 
+                target="_blank" 
+                className="text-sm font-medium text-ip-primary hover:underline flex items-center gap-1.5"
+              >
+                <Code size={14} />
+                GitHub Repository
+              </Link>
+            </div>
+          </div>
+          <div className="flex gap-3 mt-6">
+            <button className="ip-btn flex-1 flex items-center justify-center gap-2 rounded-xl border border-ip-border bg-ip-surface py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover">
+              <HelpCircle size={16} />
+              Help Document
+            </button>
+            <button className="ip-btn flex-1 flex items-center justify-center gap-2 rounded-xl border border-ip-border bg-ip-surface py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover">
+              <Heart size={16} className="text-red-500" />
+              Donate
+            </button>
+          </div>
+        </div>
       </div>
+
+      <ConfirmDialog
+        open={showBulkDeleteConfirm}
+        onClose={() => setShowBulkDeleteConfirm(false)}
+        onConfirm={() => {
+          selectedIds.forEach(id => deleteUser(id as number));
+          clearSelection();
+          setShowBulkDeleteConfirm(false);
+        }}
+        title={t('delete')}
+        description={t('bulk_delete_confirm').replace('{count}', String(selectedIds.size))}
+        tone="danger"
+        confirmLabel={t('delete')}
+        cancelLabel={t('cancel')}
+      />
 
       <AppDialog
         open={selectedUser !== null}
@@ -729,14 +823,23 @@ export default function SettingsPage() {
               htmlFor="password"
               hint="At least 8 characters with upper, lower, number, and special character."
             >
-              <input
-                id="password"
-                type="password"
-                value={formState.password}
-                onChange={(event) => updateForm('password', event.target.value)}
-                className="ip-input"
-                placeholder="Password@123"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formState.password}
+                  onChange={(event) => updateForm('password', event.target.value)}
+                  className="ip-input pr-10"
+                  placeholder="Password@123"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-ip-text-muted hover:text-ip-primary transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </FormField>
             <FormField label="Group" htmlFor="group">
               <select

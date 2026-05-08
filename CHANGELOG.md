@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## [0.7.0] — 2026-05-08 — Phase 7: UI/UX Finalization & Branding
+
+### Summary
+
+Completed **Phase 7** — implemented project-specific branding, refined Settings scannability with icons, replaced native browser dialogs with themed components, and added build metadata.
+
+### Added
+
+- **Branding Alignment**:
+  - Replaced generic placeholder logos with the official `logo.ico` asset.
+  - Updated `Sidebar` and `LoginPage` to utilize the new branded Image component.
+- **Iconic Settings Page**:
+  - Added Lucide icons to all card headers (Language/Theme, Account Management, About) for better visual anchoring.
+- **Programmatic Confirmation Dialogs**:
+  - Replaced native `confirm()` prompts for bulk deletion with the themed `ConfirmDialog` component.
+  - Integrated state-driven dialog control for a consistent in-app modal experience.
+- **About & Metadata**:
+  - Added a new "About iPark" section in Settings.
+  - Displays version (`v1.2.5`), release type (DEMO), and developer credits (TICSMTC - HCMUT).
+  - Integrated GitHub repository links and placeholder buttons for "Help" and "Donate".
+- **Password Security UX**:
+  - Implemented password visibility toggles (Eye/EyeOff) in the Login page and the User creation/edit forms.
+- **Notification Polish**:
+  - Refined `NotificationCenter` positioning (top-right) and layering (`z-index: 10000`).
+  - Added slide-in animations for better visual feedback.
+
 ## [0.6.0] — 2026-05-08 — Phase 6: UI/UX & Interaction Polish
 
 ### Summary

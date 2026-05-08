@@ -16,6 +16,7 @@ import { useParkStore } from '@/stores/park-store';
 import type { Park } from '@/types/database';
 import { useDataTable } from '@/hooks/useDataTable';
 import { Pagination } from '@/components/shared/Pagination';
+import { useTranslation } from '@/lib/i18n';
 import {
   isObjectName,
   toInputTime,
@@ -38,6 +39,7 @@ type ParkFormState = {
 export default function ParksPage() {
   const { session } = useAuthStore();
   const { parks, addPark, updatePark, deletePark } = useParkStore();
+  const { t } = useTranslation();
   const hasView = session.permissions.includes('view_parks');
   const hasEdit = session.permissions.includes('edit_parks');
   const hasAdd = session.permissions.includes('add_parks');
@@ -87,9 +89,9 @@ export default function ParksPage() {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <div className="ip-card max-w-md p-8 text-center">
-          <h2 className="mb-2 text-lg font-bold text-ip-text">Access Denied</h2>
+          <h2 className="mb-2 text-lg font-bold text-ip-text">{t('access_denied')}</h2>
           <p className="text-sm text-ip-text-secondary">
-            You do not have permission to view parks.
+            {t('no_permission_view')}
           </p>
         </div>
       </div>
@@ -217,18 +219,19 @@ export default function ParksPage() {
           {selectedIds.size > 0 ? (
             <div className="flex items-center gap-2 rounded-2xl bg-ip-surface border border-ip-border px-3 py-1.5 shadow-sm ip-fade-in">
               <span className="text-xs font-medium text-ip-text-secondary">
-                Selected {selectedIds.size} items
+                {t('selected')} {selectedIds.size} {t('items')}
               </span>
               <div className="h-4 w-[1px] bg-ip-border mx-1" />
               <button
                 type="button"
                 onClick={() => {
-                  setDeleteError('');
-                  const firstId = Array.from(selectedIds)[0];
-                  setParkToDeleteId(firstId as number);
+                  if (confirm(t('bulk_delete_confirm').replace('{count}', String(selectedIds.size)))) {
+                    selectedIds.forEach(id => deletePark(id as number));
+                    clearSelection();
+                  }
                 }}
                 className="ip-btn rounded-lg bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
-                title="Delete selected"
+                title={t('delete')}
               >
                 <Trash2 size={16} />
               </button>
@@ -237,7 +240,7 @@ export default function ParksPage() {
                 onClick={clearSelection}
                 className="text-xs font-medium text-ip-primary hover:underline ml-1"
               >
-                Clear
+                {t('clear')}
               </button>
             </div>
           ) : (

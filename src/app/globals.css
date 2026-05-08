@@ -29,19 +29,17 @@
   --foreground: #0f172a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ip-bg: #0f172a;
-    --ip-surface: #1e293b;
-    --ip-surface-hover: #334155;
-    --ip-border: #334155;
-    --ip-text: #f1f5f9;
-    --ip-text-secondary: #94a3b8;
-    --ip-text-muted: #64748b;
-    --ip-sidebar-bg: #020617;
-    --background: #0f172a;
-    --foreground: #f1f5f9;
-  }
+.dark {
+  --ip-bg: #0f172a;
+  --ip-surface: #1e293b;
+  --ip-surface-hover: #334155;
+  --ip-border: #334155;
+  --ip-text: #f1f5f9;
+  --ip-text-secondary: #94a3b8;
+  --ip-text-muted: #64748b;
+  --ip-sidebar-bg: #020617;
+  --background: #0f172a;
+  --foreground: #f1f5f9;
 }
 
 @theme inline {

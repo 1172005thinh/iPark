@@ -9,11 +9,13 @@ import { useEventHistoryStore } from '@/stores/event-history-store';
 import { useParkStore } from '@/stores/park-store';
 import { useDataTable } from '@/hooks/useDataTable';
 import { Pagination } from '@/components/shared/Pagination';
+import { useTranslation } from '@/lib/i18n';
 
 export default function EventsPage() {
   const { session } = useAuthStore();
   const { events, acknowledgeEvent, deleteEvent } = useEventHistoryStore();
   const parks = useParkStore((state) => state.parks);
+  const { t } = useTranslation();
   const hasView = session.permissions.includes('view_events');
   const hasExport = session.permissions.includes('export_events');
   const hasDelete = session.permissions.includes('delete_events');
@@ -52,8 +54,8 @@ export default function EventsPage() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="ip-card p-8 text-center max-w-md">
-          <h2 className="text-lg font-bold text-ip-text mb-2">Access Denied</h2>
-          <p className="text-sm text-ip-text-secondary">You do not have permission to view events.</p>
+          <h2 className="text-lg font-bold text-ip-text mb-2">{t('access_denied')}</h2>
+          <p className="text-sm text-ip-text-secondary">{t('no_permission_view')}</p>
         </div>
       </div>
     );
@@ -185,20 +187,20 @@ export default function EventsPage() {
         <div className="mb-4 flex items-center justify-between rounded-2xl bg-ip-primary px-6 py-3 text-white shadow-lg ip-fade-in">
           <div className="flex items-center gap-4">
             <span className="text-sm font-medium">
-              Selected {selectedIds.size} items
+              {t('selected')} {selectedIds.size} {t('items')}
             </span>
             <button 
               onClick={clearSelection}
               className="text-xs underline opacity-80 hover:opacity-100"
             >
-              Clear selection
+              {t('clear')}
             </button>
           </div>
           <div className="flex items-center gap-3">
             {hasDelete && (
               <button
                 onClick={() => {
-                  if (confirm(`Delete ${selectedIds.size} selected events?`)) {
+                  if (confirm(t('bulk_delete_confirm').replace('{count}', String(selectedIds.size)))) {
                     selectedIds.forEach(id => deleteEvent(id as number));
                     clearSelection();
                   }
@@ -206,7 +208,7 @@ export default function EventsPage() {
                 className="flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-sm font-semibold transition-colors hover:bg-white/30"
               >
                 <Trash2 size={16} />
-                Delete
+                {t('delete')}
               </button>
             )}
           </div>

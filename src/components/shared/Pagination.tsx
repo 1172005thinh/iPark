@@ -2,6 +2,7 @@
 
 import { useState, useEffect, KeyboardEvent } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface PaginationProps {
   currentPage: number;
@@ -20,6 +21,7 @@ export function Pagination({
   onPageChange,
   onPageSizeChange,
 }: PaginationProps) {
+  const { t } = useTranslation();
   const [jumpValue, setJumpValue] = useState(String(currentPage));
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export function Pagination({
     <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between border-t border-ip-border">
       <div className="flex items-center gap-4 text-sm text-ip-text-secondary">
         <div className="flex items-center gap-2">
-          <span>Show</span>
+          <span>{t('view' as any) === 'View' ? 'Show' : 'Hiển thị'}</span>
           <select
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
@@ -55,19 +57,19 @@ export function Pagination({
               </option>
             ))}
           </select>
-          <span>per page</span>
+          <span>{t('items_per_page')}</span>
         </div>
         <div className="hidden h-4 w-px bg-ip-border sm:block" />
         <p>
-          Showing <span className="font-medium text-ip-text">{Math.min(totalItems, (currentPage - 1) * pageSize + 1)}</span> to{' '}
-          <span className="font-medium text-ip-text">{Math.min(totalItems, currentPage * pageSize)}</span> of{' '}
-          <span className="font-medium text-ip-text">{totalItems}</span> results
+          {t('loading' as any) === 'Loading...' ? 'Showing' : 'Hiển thị'} <span className="font-medium text-ip-text">{Math.min(totalItems, (currentPage - 1) * pageSize + 1)}</span> {t('loading' as any) === 'Loading...' ? 'to' : 'đến'}{' '}
+          <span className="font-medium text-ip-text">{Math.min(totalItems, currentPage * pageSize)}</span> {t('of')}{' '}
+          <span className="font-medium text-ip-text">{totalItems}</span> {t('results')}
         </p>
       </div>
 
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 text-sm text-ip-text-secondary">
-          <span>Go to page</span>
+          <span>{t('go_to_page')}</span>
           <input
             type="text"
             value={jumpValue}

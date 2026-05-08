@@ -79,7 +79,9 @@ export function NotificationCenter() {
     const newEvents = events.filter((e) => e.id > lastProcessedId.current);
     if (newEvents.length > 0) {
       setActiveNotifications((prev) => {
-        const next = [...newEvents, ...prev].slice(0, 5);
+        // Only add events we haven't seen yet
+        const filteredNew = newEvents.filter(ne => !prev.some(pn => pn.id === ne.id));
+        const next = [...filteredNew, ...prev].slice(0, 5);
         return next;
       });
       lastProcessedId.current = Math.max(...events.map((e) => e.id));
@@ -91,9 +93,9 @@ export function NotificationCenter() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
+    <div className="fixed top-6 right-6 z-[10000] flex flex-col gap-3 pointer-events-none">
       {activeNotifications.map((event) => (
-        <div key={event.id} className="pointer-events-auto">
+        <div key={event.id} className="pointer-events-auto animate-in slide-in-from-right-4">
           <NotificationItem event={event} onDismiss={dismissNotification} />
         </div>
       ))}

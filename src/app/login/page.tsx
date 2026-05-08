@@ -1,19 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import NextImage from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUserStore } from '@/stores/user-store';
 import { useEventHistoryStore } from '@/stores/event-history-store';
+import { useTranslation } from '@/lib/i18n';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isBlocked, session, loginTracker } = useAuthStore();
   const { getUserByName, setOnline } = useUserStore();
   const { addEvent } = useEventHistoryStore();
+  const { t } = useTranslation();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [showForgotDialog, setShowForgotDialog] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -99,15 +104,20 @@ export default function LoginPage() {
       <div className="ip-card p-8 sm:p-10 w-full max-w-md relative ip-fade-in">
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-ip-primary flex items-center justify-center text-white font-bold text-2xl shadow-lg">
-            P
+          <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-lg bg-ip-primary/10 flex items-center justify-center">
+            <NextImage 
+              src="/logo.ico" 
+              alt="iPark Logo" 
+              fill 
+              className="object-contain p-2"
+            />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-ip-text tracking-tight">
               iPark
             </h1>
             <p className="text-xs text-ip-text-muted">
-              Smart Parking Management
+              {t('login_title')}
             </p>
           </div>
         </div>
@@ -119,7 +129,7 @@ export default function LoginPage() {
               htmlFor="login-username"
               className="block text-sm font-medium text-ip-text-secondary mb-1.5"
             >
-              Username
+              {t('username')}
             </label>
             <input
               id="login-username"
@@ -127,7 +137,7 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="ip-input"
-              placeholder="Enter your username"
+              placeholder={t('username')}
               required
               disabled={blocked || isLoading}
               autoComplete="username"
@@ -140,19 +150,29 @@ export default function LoginPage() {
               htmlFor="login-password"
               className="block text-sm font-medium text-ip-text-secondary mb-1.5"
             >
-              Password
+              {t('password')}
             </label>
-            <input
-              id="login-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="ip-input"
-              placeholder="Enter your password"
-              required
-              disabled={blocked || isLoading}
-              autoComplete="current-password"
-            />
+            <div className="relative">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="ip-input pr-10"
+                placeholder={t('password')}
+                required
+                disabled={blocked || isLoading}
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-ip-text-muted hover:text-ip-primary transition-colors"
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           {/* Error Message */}
@@ -200,10 +220,10 @@ export default function LoginPage() {
             {isLoading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Signing in...
+                {t('loading')}
               </>
             ) : (
-              'Sign In'
+              t('sign_in')
             )}
           </button>
         </form>
@@ -218,7 +238,7 @@ export default function LoginPage() {
             }}
             className="text-sm text-ip-primary hover:text-ip-primary-dark transition-colors"
           >
-            Forgot Password?
+            {t('forgot_password')}
           </button>
         </div>
 
@@ -255,10 +275,10 @@ export default function LoginPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-bold text-ip-text mb-2">
-              Reset Password
+              {t('forgot_password_title')}
             </h2>
             <p className="text-sm text-ip-text-secondary mb-4">
-              Enter your registered email to reset your password to the default value.
+              {t('forgot_password_desc')}
             </p>
 
             <input
@@ -286,7 +306,7 @@ export default function LoginPage() {
                 onClick={handleForgotPassword}
                 className="ip-btn ip-btn-primary flex-1 py-2.5 text-sm"
               >
-                Reset Password
+                {t('reset_password')}
               </button>
             </div>
           </div>

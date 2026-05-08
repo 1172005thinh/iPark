@@ -12,6 +12,7 @@ import { useStaffStore } from '@/stores/staff-store';
 import { useSystemStateStore } from '@/stores/system-state-store';
 import { useUserStore } from '@/stores/user-store';
 import { dateKey, sameDay } from '@/lib/ipark-utils';
+import { useTranslation } from '@/lib/i18n';
 import { Pin, Plus, Trash2, PencilLine } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -26,6 +27,7 @@ export default function DashboardPage() {
   const globalState = useSystemStateStore((state) => state.getGlobalState());
   const users = useUserStore((state) => state.users);
   const updateUser = useUserStore((state) => state.updateUser);
+  const { t } = useTranslation();
   const hasView = session.permissions.includes('view_dashboard');
   const hasEdit = session.permissions.includes('edit_dashboard');
   const hasAdd = session.permissions.includes('add_dashboard');
@@ -74,9 +76,9 @@ export default function DashboardPage() {
               <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
             </svg>
           </div>
-          <h2 className="text-lg font-bold text-ip-text mb-2">Access Denied</h2>
+          <h2 className="text-lg font-bold text-ip-text mb-2">{t('access_denied')}</h2>
           <p className="text-sm text-ip-text-secondary">
-            You do not have permission to view dashboards. Contact your administrator.
+            {t('no_permission_view')}
           </p>
         </div>
       </div>
@@ -192,7 +194,7 @@ export default function DashboardPage() {
     <div className="ip-fade-in pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-ip-text">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-ip-text">{t('dashboard')}</h1>
           <p className="text-sm text-ip-text-secondary mt-1">
             Welcome back, {session.user?.display_name}
           </p>
@@ -220,7 +222,7 @@ export default function DashboardPage() {
             }`}
           >
             <Pin size={16} className={activeUser?.pinned_dashboard_id === currentDashboard.id ? 'fill-current' : ''} />
-            Pin
+            {t('pin' as any) || 'Pin'}
           </button>
 
           {hasAdd && (
@@ -229,7 +231,7 @@ export default function DashboardPage() {
               className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
             >
               <Plus size={16} />
-              Add
+              {t('add')}
             </button>
           )}
 
@@ -242,7 +244,7 @@ export default function DashboardPage() {
               className="ip-btn flex items-center gap-2 rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
             >
               <Trash2 size={16} />
-              Delete
+              {t('delete')}
             </button>
           )}
 
@@ -256,7 +258,7 @@ export default function DashboardPage() {
               }`}
             >
               <PencilLine size={16} />
-              Edit
+              {t('edit')}
             </button>
           )}
         </div>
