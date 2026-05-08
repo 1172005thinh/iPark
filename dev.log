@@ -1,0 +1,849 @@
+
+> tmp_init@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by an unknown process, using available port 3002 instead.
+▲ Next.js 16.2.5 (Turbopack)
+- Local:         http://localhost:3002
+- Network:       http://192.168.1.204:3002
+✓ Ready in 1962ms
+
+○ Compiling /settings ...
+ GET /settings 200 in 9.0s (next.js: 8.5s, application-code: 470ms)
+ HEAD /settings 200 in 173ms (next.js: 15ms, application-code: 158ms)
+✓ Compiled in 849ms
+ GET /login 200 in 821ms (next.js: 299ms, application-code: 522ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/login" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en" className="geist_a715...">
+                          <body
++                           className="min-h-full flex flex-col bg-ip-bg text-ip-text"
+-                           className="min-h-full flex flex-col bg-ip-bg text-ip-text antigravity-scroll-lock"
+                          >
+                  ...
+ 
+ GET /dashboard 200 in 235ms (next.js: 86ms, application-code: 149ms)
+ GET /dashboard 200 in 159ms (next.js: 18ms, application-code: 141ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /settings 200 in 73ms (next.js: 31ms, application-code: 42ms)
+[browser] The result of getSnapshot should be cached to avoid an infinite loop 
+    at SettingsPage (src/app/(app)/settings/page.tsx:47:48)
+  45 | ...nst logout = useAuthStore((state) => state.logout);
+  46 | ...nst groups = useGroupStore((state) => state.groups);
+> 47 | ...nst enabledDashboardIds = useDashboardStore((state) =>
+     |                                               ^
+  48 | ...state.dashboards.filter((dashboard) => dashboard.is_enable).map((dashboard) => dashboar...
+  49 | ...
+  50 | ...nst hasView = session.permissions.includes('view_settings'); (src/app/(app)
+[browser] Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+✓ Compiled in 321ms
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+⨯ ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  [90m1052 |[0m   [36mreturn[0m [36mnull[0m;
+  [90m1053 |[0m }
+[31m[1m>[0m [90m1054 |[0m
+  [90m     |[0m [31m[1m^[0m
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+
+
+./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  [90m805 |[0m }
+  [90m806 |[0m
+[31m[1m>[0m [90m807 |[0m [36mfunction[0m [33mSettingRow[0m({
+  [90m    |[0m [31m[1m^[0m
+  [90m808 |[0m   label,
+  [90m809 |[0m   sublabel,
+  [90m810 |[0m   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+○ Compiling /_error ...
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+ GET /settings 500 in 12.7s (next.js: 12.0s, application-code: 704ms)
+[browser] Uncaught Error: ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./src/app/(app)/settings/page.tsx:1054:1)
+    at <unknown> (Error: (./src/app/(app)/settings/page.tsx:1054:1)
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+ GET /login 500 in 148ms (next.js: 48ms, application-code: 100ms)
+[browser] Uncaught Error: ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./src/app/(app)/settings/page.tsx:1054:1)
+    at <unknown> (Error: (./src/app/(app)/settings/page.tsx:1054:1)
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+ GET /login 500 in 77ms (next.js: 28ms, application-code: 49ms)
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] Uncaught Error: ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./src/app/(app)/settings/page.tsx:1054:1)
+    at <unknown> (Error: (./src/app/(app)/settings/page.tsx:1054:1)
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+ GET /dashboard 500 in 77ms (next.js: 28ms, application-code: 49ms)
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] Uncaught Error: ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./src/app/(app)/settings/page.tsx:1054:1)
+    at <unknown> (Error: (./src/app/(app)/settings/page.tsx:1054:1)
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:1054:1
+Expected '}', got '<eof>'
+  1052 |   return null;
+  1053 | }
+> 1054 |
+       | ^
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+[browser] ./src/app/(app)/settings/page.tsx:807:1
+Expected a semicolon
+  805 | }
+  806 |
+> 807 | function SettingRow({
+      | ^
+  808 |   label,
+  809 |   sublabel,
+  810 |   checked,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(app)/settings/page.tsx [Client Component Browser]
+    ./src/app/(app)/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(app)/settings/page.tsx [Client Component SSR]
+    ./src/app/(app)/settings/page.tsx [Server Component] 
+✓ Compiled in 1349ms
+✓ Compiled in 212ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /dashboard 200 in 5.4s (next.js: 649ms, application-code: 4.8s)
+ GET /dashboard 200 in 2.4s (next.js: 462ms, application-code: 1986ms)
+ GET /dashboard 200 in 2.4s (next.js: 752ms, application-code: 1680ms)
+ GET /dashboard 200 in 2.4s (next.js: 1690ms, application-code: 665ms)
+ GET /dashboard 200 in 701ms (next.js: 244ms, application-code: 457ms)
+ GET /login 200 in 66ms (next.js: 25ms, application-code: 42ms)
+ GET /login 200 in 116ms (next.js: 7ms, application-code: 109ms)
+ GET /dashboard 200 in 145ms (next.js: 6ms, application-code: 139ms)
+ GET /dashboard 200 in 77ms (next.js: 4ms, application-code: 74ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /settings 200 in 372ms (next.js: 174ms, application-code: 199ms)
+ GET /events 200 in 115ms (next.js: 68ms, application-code: 47ms)
+ GET /dashboard 200 in 55ms (next.js: 8ms, application-code: 47ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /events 200 in 61ms (next.js: 16ms, application-code: 45ms)
+ GET /dashboard 200 in 88ms (next.js: 5ms, application-code: 83ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /parks 200 in 110ms (next.js: 62ms, application-code: 48ms)
+ GET /dashboard 200 in 82ms (next.js: 7ms, application-code: 75ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /login 200 in 96ms (next.js: 7ms, application-code: 89ms)
+ GET /login 200 in 144ms (next.js: 7ms, application-code: 137ms)

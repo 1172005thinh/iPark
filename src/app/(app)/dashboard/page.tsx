@@ -12,6 +12,7 @@ import { useStaffStore } from '@/stores/staff-store';
 import { useSystemStateStore } from '@/stores/system-state-store';
 import { useUserStore } from '@/stores/user-store';
 import { dateKey, sameDay } from '@/lib/ipark-utils';
+import { Pin, Plus, Trash2, PencilLine } from 'lucide-react';
 
 export default function DashboardPage() {
   const { session } = useAuthStore();
@@ -212,21 +213,23 @@ export default function DashboardPage() {
 
           <button
             onClick={handlePinToggle}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${
+            className={`ip-btn flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors border ${
               activeUser?.pinned_dashboard_id === currentDashboard.id
                 ? 'bg-ip-accent/10 text-ip-accent border-ip-accent/30'
-                : 'bg-ip-bg text-ip-text border-ip-border hover:bg-ip-card'
+                : 'bg-ip-surface text-ip-text-secondary border-ip-border hover:bg-ip-surface-hover hover:text-ip-text'
             }`}
           >
-            {activeUser?.pinned_dashboard_id === currentDashboard.id ? 'Pinned Default' : 'Pin Default'}
+            <Pin size={16} className={activeUser?.pinned_dashboard_id === currentDashboard.id ? 'fill-current' : ''} />
+            Pin
           </button>
 
           {hasAdd && (
             <button
               onClick={openAddDialog}
-              className="px-4 py-2 text-sm font-medium rounded-lg transition-colors border bg-ip-primary text-white border-ip-primary hover:bg-ip-primary/90"
+              className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
             >
-              Add Dashboard
+              <Plus size={16} />
+              Add
             </button>
           )}
 
@@ -236,8 +239,9 @@ export default function DashboardPage() {
                 setDialogError('');
                 setShowDeleteDialog(true);
               }}
-              className="px-4 py-2 text-sm font-medium rounded-lg transition-colors border bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+              className="ip-btn flex items-center gap-2 rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
             >
+              <Trash2 size={16} />
               Delete
             </button>
           )}
@@ -245,13 +249,14 @@ export default function DashboardPage() {
           {hasEdit && (
             <button 
               onClick={() => setIsEditing(!isEditing)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${
+              className={`ip-btn flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg transition-colors border ${
                 isEditing 
-                ? 'bg-ip-primary text-white border-ip-primary' 
-                : 'bg-ip-bg text-ip-text border-ip-border hover:bg-ip-card'
+                ? 'bg-ip-primary text-white border-ip-primary shadow-ip-primary/20' 
+                : 'bg-ip-surface text-ip-text-secondary border-ip-border hover:bg-ip-surface-hover hover:text-ip-text shadow-slate-900/5'
               }`}
             >
-              {isEditing ? 'Done Editing' : 'Edit Layout'}
+              <PencilLine size={16} />
+              Edit
             </button>
           )}
         </div>

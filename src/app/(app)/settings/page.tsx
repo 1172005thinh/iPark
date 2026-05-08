@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { useShallow } from 'zustand/react/shallow';
 import {
   Bell,
   Eye,
@@ -44,8 +45,12 @@ export default function SettingsPage() {
   const session = useAuthStore((state) => state.session);
   const logout = useAuthStore((state) => state.logout);
   const groups = useGroupStore((state) => state.groups);
-  const enabledDashboardIds = useDashboardStore((state) =>
-    state.dashboards.filter((dashboard) => dashboard.is_enable).map((dashboard) => dashboard.id)
+  const enabledDashboardIds = useDashboardStore(
+    useShallow((state) =>
+      state.dashboards
+        .filter((dashboard) => dashboard.is_enable)
+        .map((dashboard) => dashboard.id)
+    )
   );
   const hasView = session.permissions.includes('view_settings');
   const hasEdit = session.permissions.includes('edit_settings');
@@ -243,8 +248,8 @@ export default function SettingsPage() {
     setUserToDeleteId(null);
   };
 
-  return (
-    <div className="ip-fade-in">
+    return (
+      <div className="ip-fade-in">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-ip-text">Settings</h1>
         <p className="mt-1 text-sm text-ip-text-secondary">

@@ -8,16 +8,11 @@ Completed **Phase 5** — confirmed Settings and system-state wiring, expanded t
 
 ### Added
 
-- **Dashboard dialogs** now use the shared `AppDialog` and `ConfirmDialog` components for add/delete actions.
-
-### Changed
-
-- **Events View (`/events`)** now maps park names from the live `PARK_DB` store to reflect park edits immediately.
-- **Database documentation** updated to reflect that all tables are live-editable during the demo session.
-
-### Fixed
-
-- Corrected invalid event code `00c` to `012` in `EVENT_DB` and `EVENT_HISTORY_DB` seed data to comply with the 3-digit format rule.
+- **Settings Page Crash**: Resolved a critical hydration/runtime crash caused by an infinite re-render loop in the dashboard selector. Implemented `useShallow` to ensure stable references for derived dashboard data.
+- **`AppDialog` Responsiveness**: Fixed content clipping on non-standard screen sizes by implementing internal vertical scrolling and flexible height constraints (`max-h-[calc(100vh-2rem)]`).
+- **Dashboard UI Standardization**: Unified top-level control buttons (Pin, Add, Delete, Edit) on the Dashboards page with the "Modern Curve" system and Lucide icons for consistency across all management views.
+- **Administrative Security**: Standardized dangerous actions (e.g., toggling maintenance mode) to require `window.prompt` password verification (`Admin@123`).
+- **State-Aware AuthGuard**: Enhanced the `AuthGuard` to monitor `SYSTEM_STATE_DB` and account statuses, proactively logging out users whose accounts are disabled or revoked during live sessions.
 
 ---
 

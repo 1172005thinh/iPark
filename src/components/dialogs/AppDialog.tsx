@@ -101,11 +101,11 @@ export function AppDialog({
         aria-describedby={description ? descriptionId : undefined}
         className={`relative w-full ${sizeClasses[size]} ${panelClassName}`}
       >
-        <div className="ip-card overflow-hidden rounded-[2rem] shadow-2xl shadow-slate-900/10">
-          <div className="relative">
+        <div className="ip-card overflow-hidden rounded-[2rem] shadow-2xl shadow-slate-900/10 flex flex-col max-h-[calc(100vh-2rem)]">
+          <div className="relative flex flex-col flex-1 min-h-0">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-br from-ip-primary/8 via-transparent to-ip-accent/8" />
-            <div className="relative p-6 sm:p-7">
-              <div className="flex items-start gap-4">
+            <div className="relative p-6 sm:p-7 flex-1 overflow-y-auto">
+              <div className="flex items-start gap-4 shrink-0">
                 {icon ? (
                   <div
                     className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border shadow-sm ${toneClasses[tone]}`}
@@ -147,7 +147,7 @@ export function AppDialog({
             </div>
 
             {footer ? (
-              <div className="border-t border-ip-border/80 bg-ip-bg/70 px-6 py-4 sm:px-7">
+              <div className="border-t border-ip-border/80 bg-ip-bg/70 px-6 py-4 sm:px-7 shrink-0">
                 {footer}
               </div>
             ) : null}
