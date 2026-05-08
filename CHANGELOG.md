@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## [0.6.0] — 2026-05-08 — Phase 6: UI/UX & Interaction Polish
+
+### Summary
+
+Completed **Phase 6** — implemented advanced table interactions (pagination, multi-selection), a real-time in-app notification system, and global personalization (theme/language synchronization).
+
+### Added
+
+- **Pagination & Multi-Selection**:
+  - Created a reusable `useDataTable` hook to centralize sorting, pagination, and selection logic.
+  - Implemented a standard `Pagination` component for all management tables (Parks, Staffs, Events, Users).
+  - Added manual page jumping ("Go to page") and configurable page sizes (10, 20, 50, 100).
+  - Integrated "Select All" and individual row checkboxes for mass actions across all table views.
+- **In-App Notifications**:
+  - Implemented a global `NotificationCenter` that listens to `EVENT_HISTORY_DB`.
+  - Real-time alerts for system events with severity-based coloring (Blue/Info, Amber/Warning, Red/Error).
+  - Automatic dismissal after 3 seconds with smooth fade-out animations.
+- **Real-time Personalization**:
+  - Implemented `ThemeLanguageProvider` to synchronize the application's appearance (Light/Dark/System) and localization (EN/VN) with the authenticated user's preferences in real-time.
+  - Theme switching applies globally to all routes and components immediately upon selection.
+- **Standardized Event Views**:
+  - Replaced inline event details with the system-standard `AppDialog` pattern, matching Parks and Staffs modules.
+- **Login UX**:
+  - Username field now auto-focuses on the login page for a faster entry flow.
+
+---
+
 ## [0.5.0] — 2026-05-08 — Phase 5: Settings & Live Data Expansion
 
 ### Summary

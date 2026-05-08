@@ -15,6 +15,8 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useParkStore } from '@/stores/park-store';
 import { useStaffStore } from '@/stores/staff-store';
 import type { Staff } from '@/types/database';
+import { useDataTable } from '@/hooks/useDataTable';
+import { Pagination } from '@/components/shared/Pagination';
 
 type StaffFormState = {
   staff_name: string;
@@ -38,8 +40,27 @@ export default function StaffsPage() {
   const hasAdd = session.permissions.includes('add_staffs');
   const hasDelete = session.permissions.includes('delete_staffs');
 
-  const [sortKey, setSortKey] = useState<string>('id');
-  const [sortAsc, setSortAsc] = useState(true);
+  const {
+    paginatedData: pagedStaffs,
+    handleSort,
+    sortKey,
+    sortAsc,
+    currentPage,
+    pageSize,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handlePageSizeChange,
+    toggleSelectAll,
+    toggleSelectRow,
+    isSelected,
+    allSelected,
+    someSelected,
+  } = useDataTable({
+    data: staffs,
+    initialSortKey: 'id',
+  });
+
   const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
   const [staffToDeleteId, setStaffToDeleteId] = useState<number | null>(null);
   const [formDialog, setFormDialog] = useState<{
@@ -70,33 +91,10 @@ export default function StaffsPage() {
     );
   }
 
-  const handleSort = (key: string) => {
-    if (sortKey === key) {
-      setSortAsc(!sortAsc);
-      return;
-    }
-
-    setSortKey(key);
-    setSortAsc(true);
-  };
-
   const parkNameMap: Record<number, string> = {};
   for (const park of parks) {
     parkNameMap[park.id] = park.display_name;
   }
-
-  const sorted = [...staffs].sort((a, b) => {
-    const aVal = (a as unknown as Record<string, unknown>)[sortKey];
-    const bVal = (b as unknown as Record<string, unknown>)[sortKey];
-
-    if (typeof aVal === 'string' && typeof bVal === 'string') {
-      return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-    }
-
-    return sortAsc
-      ? Number(aVal) - Number(bVal)
-      : Number(bVal) - Number(aVal);
-  });
 
   const columns = [
     { key: 'id', label: 'ID' },
@@ -241,6 +239,17 @@ export default function StaffsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ip-border">
+                <th className="px-5 py-3.5 text-left w-10">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someSelected;
+                    }}
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4 rounded border-ip-border bg-ip-surface text-ip-primary focus:ring-ip-primary/20"
+                  />
+                </th>
                 {columns.map((col) => (
                   <th
                     key={col.key}
@@ -263,12 +272,20 @@ export default function StaffsPage() {
               </tr>
             </thead>
             <tbody>
-              {sorted.length > 0 ? (
-                sorted.map((staff) => (
+              {pagedStaffs.length > 0 ? (
+                pagedStaffs.map((staff) => (
                   <tr
                     key={staff.id}
-                    className="border-b border-ip-border transition-colors last:border-0 hover:bg-ip-surface-hover"
+                    className={`border-b border-ip-border transition-colors last:border-0 hover:bg-ip-surface-hover ${isSelected(staff.id) ? 'bg-ip-primary/5' : ''}`}
                   >
+                    <td className="px-5 py-4">
+                      <input
+                        type="checkbox"
+                        checked={isSelected(staff.id)}
+                        onChange={() => toggleSelectRow(staff.id)}
+                        className="h-4 w-4 rounded border-ip-border bg-ip-surface text-ip-primary focus:ring-ip-primary/20"
+                      />
+                    </td>
                     <td className="px-5 py-4 font-mono text-xs">{staff.id}</td>
                     <td className="px-5 py-4 font-medium text-ip-text">
                       {staff.display_name}
@@ -330,7 +347,7 @@ export default function StaffsPage() {
               ) : (
                 <tr>
                   <td
-                    colSpan={showActions ? columns.length + 1 : columns.length}
+                    colSpan={showActions ? columns.length + 2 : columns.length + 1}
                     className="px-6 py-14 text-center text-sm text-ip-text-muted"
                   >
                     No staff members available. Add a new staff record to begin.
@@ -340,6 +357,14 @@ export default function StaffsPage() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
 
       <AppDialog

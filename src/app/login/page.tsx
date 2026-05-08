@@ -131,6 +131,7 @@ export default function LoginPage() {
               required
               disabled={blocked || isLoading}
               autoComplete="username"
+              autoFocus
             />
           </div>
 

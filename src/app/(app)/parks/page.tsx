@@ -14,6 +14,8 @@ import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
 import { useAuthStore } from '@/stores/auth-store';
 import { useParkStore } from '@/stores/park-store';
 import type { Park } from '@/types/database';
+import { useDataTable } from '@/hooks/useDataTable';
+import { Pagination } from '@/components/shared/Pagination';
 
 type ParkFormState = {
   park_name: string;
@@ -36,8 +38,27 @@ export default function ParksPage() {
   const hasAdd = session.permissions.includes('add_parks');
   const hasDelete = session.permissions.includes('delete_parks');
 
-  const [sortKey, setSortKey] = useState<string>('id');
-  const [sortAsc, setSortAsc] = useState(true);
+  const {
+    paginatedData: pagedParks,
+    handleSort,
+    sortKey,
+    sortAsc,
+    currentPage,
+    pageSize,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handlePageSizeChange,
+    toggleSelectAll,
+    toggleSelectRow,
+    isSelected,
+    allSelected,
+    someSelected,
+  } = useDataTable({
+    data: parks,
+    initialSortKey: 'id',
+  });
+
   const [selectedParkId, setSelectedParkId] = useState<number | null>(null);
   const [parkToDeleteId, setParkToDeleteId] = useState<number | null>(null);
   const [formDialog, setFormDialog] = useState<{
@@ -67,29 +88,6 @@ export default function ParksPage() {
       </div>
     );
   }
-
-  const handleSort = (key: string) => {
-    if (sortKey === key) {
-      setSortAsc(!sortAsc);
-      return;
-    }
-
-    setSortKey(key);
-    setSortAsc(true);
-  };
-
-  const sorted = [...parks].sort((a, b) => {
-    const aVal = (a as unknown as Record<string, unknown>)[sortKey];
-    const bVal = (b as unknown as Record<string, unknown>)[sortKey];
-
-    if (typeof aVal === 'string' && typeof bVal === 'string') {
-      return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-    }
-
-    return sortAsc
-      ? Number(aVal) - Number(bVal)
-      : Number(bVal) - Number(aVal);
-  });
 
   const columns = [
     { key: 'id', label: 'ID' },
@@ -230,6 +228,17 @@ export default function ParksPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ip-border">
+                <th className="px-5 py-3.5 text-left w-10">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someSelected;
+                    }}
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4 rounded border-ip-border bg-ip-surface text-ip-primary focus:ring-ip-primary/20"
+                  />
+                </th>
                 {columns.map((col) => (
                   <th
                     key={col.key}
@@ -252,12 +261,20 @@ export default function ParksPage() {
               </tr>
             </thead>
             <tbody>
-              {sorted.length > 0 ? (
-                sorted.map((park) => (
+              {pagedParks.length > 0 ? (
+                pagedParks.map((park) => (
                   <tr
                     key={park.id}
-                    className="border-b border-ip-border transition-colors last:border-0 hover:bg-ip-surface-hover"
+                    className={`border-b border-ip-border transition-colors last:border-0 hover:bg-ip-surface-hover ${isSelected(park.id) ? 'bg-ip-primary/5' : ''}`}
                   >
+                    <td className="px-5 py-4">
+                      <input
+                        type="checkbox"
+                        checked={isSelected(park.id)}
+                        onChange={() => toggleSelectRow(park.id)}
+                        className="h-4 w-4 rounded border-ip-border bg-ip-surface text-ip-primary focus:ring-ip-primary/20"
+                      />
+                    </td>
                     <td className="px-5 py-4 font-mono text-xs">{park.id}</td>
                     <td className="px-5 py-4 font-medium text-ip-text">
                       {park.display_name}
@@ -319,7 +336,7 @@ export default function ParksPage() {
               ) : (
                 <tr>
                   <td
-                    colSpan={showActions ? columns.length + 1 : columns.length}
+                    colSpan={showActions ? columns.length + 2 : columns.length + 1}
                     className="px-6 py-14 text-center text-sm text-ip-text-muted"
                   >
                     No parks available. Add a new park to begin.
@@ -329,6 +346,14 @@ export default function ParksPage() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
 
       <AppDialog

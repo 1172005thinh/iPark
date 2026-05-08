@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, type MouseEvent } from 'react';
-import { Download, Trash2 } from 'lucide-react';
+import { useState, type MouseEvent, type ReactNode } from 'react';
+import { Download, Eye, Trash2, Info } from 'lucide-react';
+import { AppDialog } from '@/components/dialogs/AppDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
 import { useAuthStore } from '@/stores/auth-store';
 import { useEventHistoryStore } from '@/stores/event-history-store';
 import { useParkStore } from '@/stores/park-store';
+import { useDataTable } from '@/hooks/useDataTable';
+import { Pagination } from '@/components/shared/Pagination';
 
 export default function EventsPage() {
   const { session } = useAuthStore();
@@ -15,8 +18,28 @@ export default function EventsPage() {
   const hasExport = session.permissions.includes('export_events');
   const hasDelete = session.permissions.includes('delete_events');
 
-  const [sortKey, setSortKey] = useState<string>('id');
-  const [sortAsc, setSortAsc] = useState(false);
+  const {
+    paginatedData: pagedEvents,
+    handleSort,
+    sortKey,
+    sortAsc,
+    currentPage,
+    pageSize,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handlePageSizeChange,
+    toggleSelectAll,
+    toggleSelectRow,
+    isSelected,
+    allSelected,
+    someSelected,
+  } = useDataTable({
+    data: events,
+    initialSortKey: 'id',
+    initialSortAsc: false,
+  });
+
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [eventToDelete, setEventToDelete] = useState<number | null>(null);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
@@ -38,13 +61,8 @@ export default function EventsPage() {
     parkMap[park.id] = park.display_name;
   });
 
-  const handleSort = (key: string) => {
-    if (sortKey === key) setSortAsc(!sortAsc);
-    else { setSortKey(key); setSortAsc(true); }
-  };
-
   const handleRowClick = (id: number) => {
-    setSelectedId(id === selectedId ? null : id);
+    setSelectedId(id);
     acknowledgeEvent(id);
   };
 
@@ -52,13 +70,6 @@ export default function EventsPage() {
     if (e) e.stopPropagation();
     setEventToDelete(id);
   };
-
-  const sorted = [...events].sort((a, b) => {
-    const av = (a as unknown as Record<string, unknown>)[sortKey];
-    const bv = (b as unknown as Record<string, unknown>)[sortKey];
-    if (typeof av === 'string' && typeof bv === 'string') return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
-    return sortAsc ? Number(av) - Number(bv) : Number(bv) - Number(av);
-  });
 
   const cols = [
     { key: 'id', label: 'ID' }, { key: 'event_code', label: 'Code' },
@@ -73,7 +84,7 @@ export default function EventsPage() {
 
   const selected = events.find((e) => e.id === selectedId);
   const deleteTarget = events.find((e) => e.id === eventToDelete) ?? null;
-  const showActions = hasDelete;
+  const showActions = hasView || hasDelete;
 
   const handleConfirmDelete = () => {
     if (!deleteTarget) return;
@@ -168,11 +179,22 @@ export default function EventsPage() {
         </div>
       </div>
 
-      <div className="ip-card overflow-hidden">
+      <div className="ip-card overflow-hidden rounded-[2rem]">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ip-border">
+                <th className="px-5 py-3.5 text-left w-10">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someSelected;
+                    }}
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4 rounded border-ip-border bg-ip-surface text-ip-primary focus:ring-ip-primary/20"
+                  />
+                </th>
                 {cols.map((c) => (
                   <th key={c.key} onClick={() => handleSort(c.key)} className="px-5 py-3.5 text-left font-semibold text-ip-text-secondary cursor-pointer hover:text-ip-text select-none">
                     <span className="flex items-center gap-1">{c.label}{sortKey === c.key && <span className="text-ip-primary">{sortAsc ? '↑' : '↓'}</span>}</span>
@@ -186,18 +208,41 @@ export default function EventsPage() {
               </tr>
             </thead>
             <tbody>
-              {sorted.map((ev) => (
-                <tr key={ev.id} onClick={() => handleRowClick(ev.id)} className={`border-b border-ip-border last:border-0 hover:bg-ip-surface-hover transition-colors cursor-pointer ${selectedId === ev.id ? 'bg-ip-surface-hover' : ''} ${!ev.is_acknowledged ? 'font-medium' : ''}`}>
-                  <td className="px-5 py-3.5 font-mono text-xs">{ev.id}</td>
-                  <td className="px-5 py-3.5 font-mono text-xs">{ev.event_code}</td>
-                  <td className="px-5 py-3.5 text-ip-text">{ev.event_name}</td>
-                  <td className="px-5 py-3.5"><span className={`text-xs font-medium px-2.5 py-1 rounded-full ${typeColors[ev.event_type] || ''}`}>{ev.event_type}</span></td>
-                  <td className="px-5 py-3.5 text-ip-text-secondary">{parkMap[ev.at_park_id] || `#${ev.at_park_id}`}</td>
-                  <td className="px-5 py-3.5 text-ip-text-secondary text-xs">{ev.received_time}</td>
-                  <td className="px-5 py-3.5">{ev.is_acknowledged ? <span className="text-green-500">✓</span> : <span className="text-ip-text-muted">—</span>}</td>
+              {pagedEvents.map((ev) => (
+                <tr key={ev.id} onClick={() => handleRowClick(ev.id)} className={`border-b border-ip-border last:border-0 hover:bg-ip-surface-hover transition-colors cursor-pointer ${selectedId === ev.id ? 'bg-ip-surface-hover' : ''} ${isSelected(ev.id) ? 'bg-ip-primary/5' : ''} ${!ev.is_acknowledged ? 'font-medium' : ''}`}>
+                  <td className="px-5 py-4">
+                    <input
+                      type="checkbox"
+                      checked={isSelected(ev.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleSelectRow(ev.id);
+                      }}
+                      className="h-4 w-4 rounded border-ip-border bg-ip-surface text-ip-primary focus:ring-ip-primary/20"
+                    />
+                  </td>
+                  <td className="px-5 py-4 font-mono text-xs">{ev.id}</td>
+                  <td className="px-5 py-4 font-mono text-xs">{ev.event_code}</td>
+                  <td className="px-5 py-4 text-ip-text">{ev.event_name}</td>
+                  <td className="px-5 py-4"><span className={`text-xs font-medium px-2.5 py-1 rounded-full ${typeColors[ev.event_type] || ''}`}>{ev.event_type}</span></td>
+                  <td className="px-5 py-4 text-ip-text-secondary">{parkMap[ev.at_park_id] || `#${ev.at_park_id}`}</td>
+                  <td className="px-5 py-4 text-ip-text-secondary text-xs">{ev.received_time}</td>
+                  <td className="px-5 py-4">{ev.is_acknowledged ? <span className="text-green-500">✓</span> : <span className="text-ip-text-muted">—</span>}</td>
                   {showActions && (
-                    <td className="px-5 py-3.5 text-right">
+                    <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {hasView && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRowClick(ev.id);
+                            }}
+                            className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-text-secondary hover:bg-ip-bg hover:text-ip-text"
+                          >
+                            <Eye size={14} />
+                            View
+                          </button>
+                        )}
                         {hasDelete && (
                           <button
                             onClick={(e) => handleDeleteRequest(ev.id, e)}
@@ -215,37 +260,69 @@ export default function EventsPage() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
 
-      {selected && (
-        <div className="ip-card p-6 mt-4 ip-fade-in">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-ip-text">Event Detail</h3>
-            <div className="flex items-center gap-3">
-              {hasDelete && (
-                <button
-                  onClick={() => handleDeleteRequest(selected.id)}
-                  className="ip-btn flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100"
-                >
-                  <Trash2 size={14} />
-                  Delete Event
-                </button>
-              )}
-              <button onClick={() => setSelectedId(null)} className="text-ip-text-muted hover:text-ip-text">✕</button>
-            </div>
+      <AppDialog
+        open={selected !== undefined}
+        onClose={() => setSelectedId(null)}
+        title={selected ? selected.event_name : 'Event details'}
+        description={
+          selected
+            ? `Event #${selected.id} captured on ${selected.received_time}.`
+            : undefined
+        }
+        icon={<Info size={22} />}
+        size="lg"
+        footer={
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => setSelectedId(null)}
+              className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
+            >
+              Close
+            </button>
+            {hasDelete && selected ? (
+              <button
+                type="button"
+                onClick={() => {
+                  handleDeleteRequest(selected.id);
+                  setSelectedId(null);
+                }}
+                className="ip-btn rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+              >
+                Delete Event
+              </button>
+            ) : null}
           </div>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><span className="text-ip-text-muted text-xs block mb-0.5">Name</span><span className="text-ip-text">{selected.event_name}</span></div>
-            <div><span className="text-ip-text-muted text-xs block mb-0.5">Code</span><span className="text-ip-text">{selected.event_code}</span></div>
-            <div><span className="text-ip-text-muted text-xs block mb-0.5">Type</span><span className="text-ip-text">{selected.event_type}</span></div>
-            <div><span className="text-ip-text-muted text-xs block mb-0.5">Error Code</span><span className="text-ip-text">{selected.error_code}</span></div>
-            <div><span className="text-ip-text-muted text-xs block mb-0.5">Park</span><span className="text-ip-text">{parkMap[selected.at_park_id] || 'Unknown'}</span></div>
-            <div><span className="text-ip-text-muted text-xs block mb-0.5">Received</span><span className="text-ip-text">{selected.received_time}</span></div>
-            <div className="col-span-2"><span className="text-ip-text-muted text-xs block mb-0.5">Description</span><span className="text-ip-text">{selected.description}</span></div>
-            {selected.extra_info && <div className="col-span-2"><span className="text-ip-text-muted text-xs block mb-0.5">Extra Info</span><span className="text-ip-text">{selected.extra_info}</span></div>}
+        }
+      >
+        {selected ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            <DetailItem label="Event Name" value={selected.event_name} />
+            <DetailItem label="Event Code" value={selected.event_code} />
+            <DetailItem 
+              label="Type" 
+              value={<span className={`text-xs font-medium px-2.5 py-1 rounded-full ${typeColors[selected.event_type] || ''}`}>{selected.event_type}</span>} 
+            />
+            <DetailItem label="Error Code" value={selected.error_code} />
+            <DetailItem label="Park" value={parkMap[selected.at_park_id] || 'Unknown'} />
+            <DetailItem label="Received Time" value={selected.received_time} />
+            <DetailItem label="Sent Time" value={selected.sent_time} />
+            <DetailItem label="Acknowledged" value={<StatusBadge active={selected.is_acknowledged} />} />
+            <DetailItem label="Description" value={selected.description} className="md:col-span-2" />
+            {selected.extra_info && <DetailItem label="Extra Info" value={selected.extra_info} className="md:col-span-2" />}
           </div>
-        </div>
-      )}
+        ) : null}
+      </AppDialog>
 
       <ConfirmDialog
         open={deleteTarget !== null}
@@ -260,6 +337,42 @@ export default function EventsPage() {
         confirmLabel="Delete Event"
         tone="danger"
       />
+    </div>
+  );
+}
+
+function StatusBadge({ active }: { active: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
+        active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
+      }`}
+    >
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${
+          active ? 'bg-green-500' : 'bg-red-400'
+        }`}
+      />
+      {active ? 'Yes' : 'No'}
+    </span>
+  );
+}
+
+function DetailItem({
+  label,
+  value,
+  className = '',
+}: {
+  label: string;
+  value: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`rounded-2xl border border-ip-border bg-ip-bg/60 p-4 ${className}`}>
+      <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-ip-text-muted">
+        {label}
+      </span>
+      <div className="text-sm leading-6 text-ip-text">{value}</div>
     </div>
   );
 }

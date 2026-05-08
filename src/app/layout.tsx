@@ -18,6 +18,8 @@ export const metadata: Metadata = {
     "iPark Smart Parking Management System — Monitor parks, staff, events, and dashboards in real time.",
 };
 
+import { ThemeLanguageProvider } from "@/components/providers/ThemeLanguageProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,7 +31,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ip-bg text-ip-text">
-        {children}
+        <ThemeLanguageProvider>{children}</ThemeLanguageProvider>
       </body>
     </html>
   );

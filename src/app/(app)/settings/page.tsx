@@ -21,6 +21,8 @@ import { useDashboardStore } from '@/stores/dashboard-store';
 import { useGroupStore } from '@/stores/group-store';
 import { useUserStore } from '@/stores/user-store';
 import type { User } from '@/types/database';
+import { useDataTable } from '@/hooks/useDataTable';
+import { Pagination } from '@/components/shared/Pagination';
 
 type NotificationSettings = {
   notificationsEnabled: boolean;
@@ -69,8 +71,27 @@ export default function SettingsPage() {
     inAppEnabled: true,
     emailEnabled: false,
   });
-  const [sortKey, setSortKey] = useState<string>('id');
-  const [sortAsc, setSortAsc] = useState(true);
+  const {
+    paginatedData: pagedUsers,
+    handleSort,
+    sortKey,
+    sortAsc,
+    currentPage,
+    pageSize,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handlePageSizeChange,
+    toggleSelectAll,
+    toggleSelectRow,
+    isSelected,
+    allSelected,
+    someSelected,
+  } = useDataTable({
+    data: users,
+    initialSortKey: 'id',
+  });
+
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [userToToggleStatusId, setUserToToggleStatusId] = useState<number | null>(null);
   const [userToRevokeId, setUserToRevokeId] = useState<number | null>(null);
@@ -112,28 +133,6 @@ export default function SettingsPage() {
     );
   }
 
-  const handleSort = (key: string) => {
-    if (sortKey === key) {
-      setSortAsc(!sortAsc);
-      return;
-    }
-
-    setSortKey(key);
-    setSortAsc(true);
-  };
-
-  const sortedUsers = [...users].sort((a, b) => {
-    const aVal = (a as unknown as Record<string, unknown>)[sortKey];
-    const bVal = (b as unknown as Record<string, unknown>)[sortKey];
-
-    if (typeof aVal === 'string' && typeof bVal === 'string') {
-      return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-    }
-
-    return sortAsc
-      ? Number(aVal) - Number(bVal)
-      : Number(bVal) - Number(aVal);
-  });
 
   const openCreateDialog = () => {
     setFormDialog({ mode: 'create' });
@@ -387,6 +386,17 @@ export default function SettingsPage() {
             <table className="w-full text-left text-sm">
               <thead className="border-b border-ip-border bg-ip-bg/50 text-ip-text-secondary">
                 <tr>
+                  <th className="px-4 py-3 text-left w-10">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      ref={(el) => {
+                        if (el) el.indeterminate = someSelected;
+                      }}
+                      onChange={toggleSelectAll}
+                      className="h-4 w-4 rounded border-ip-border bg-ip-surface text-ip-primary focus:ring-ip-primary/20"
+                    />
+                  </th>
                   {[
                     { key: 'id', label: 'ID' },
                     { key: 'user_name', label: 'Username' },
@@ -416,11 +426,19 @@ export default function SettingsPage() {
                 </tr>
               </thead>
               <tbody>
-                {sortedUsers.map((user) => (
+                {pagedUsers.map((user) => (
                   <tr
                     key={user.id}
-                    className="border-b border-ip-border transition-colors last:border-0 hover:bg-ip-surface-hover"
+                    className={`border-b border-ip-border transition-colors last:border-0 hover:bg-ip-surface-hover ${isSelected(user.id) ? 'bg-ip-primary/5' : ''}`}
                   >
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={isSelected(user.id)}
+                        onChange={() => toggleSelectRow(user.id)}
+                        className="h-4 w-4 rounded border-ip-border bg-ip-surface text-ip-primary focus:ring-ip-primary/20"
+                      />
+                    </td>
                     <td className="px-4 py-3 font-mono text-xs">{user.id}</td>
                     <td className="px-4 py-3 font-medium text-ip-text">
                       <div className="flex items-center gap-2">
@@ -496,6 +514,14 @@ export default function SettingsPage() {
               </tbody>
             </table>
           </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
         </div>
       </div>
 
