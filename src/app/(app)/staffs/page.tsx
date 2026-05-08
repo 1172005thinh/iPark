@@ -1,12 +1,38 @@
 'use client';
 
-import { useState } from 'react';
-import { STAFF_DB } from '@/data/mock-staffs';
-import { PARK_DB } from '@/data/mock-parks';
+import { useState, type FormEvent, type ReactNode } from 'react';
+import {
+  BriefcaseBusiness,
+  Eye,
+  PencilLine,
+  Plus,
+  ShieldCheck,
+  Trash2,
+} from 'lucide-react';
+import { AppDialog } from '@/components/dialogs/AppDialog';
+import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
 import { useAuthStore } from '@/stores/auth-store';
+import { useParkStore } from '@/stores/park-store';
+import { useStaffStore } from '@/stores/staff-store';
+import type { Staff } from '@/types/database';
+
+type StaffFormState = {
+  staff_name: string;
+  display_name: string;
+  description: string;
+  at_park_id: string;
+  start_time: string;
+  end_time: string;
+  role: string;
+  payment: string;
+  is_enable: boolean;
+  is_on_shift: boolean;
+};
 
 export default function StaffsPage() {
   const { session } = useAuthStore();
+  const { parks } = useParkStore();
+  const { staffs, addStaff, updateStaff, deleteStaff } = useStaffStore();
   const hasView = session.permissions.includes('view_staffs');
   const hasEdit = session.permissions.includes('edit_staffs');
   const hasAdd = session.permissions.includes('add_staffs');
@@ -14,12 +40,28 @@ export default function StaffsPage() {
 
   const [sortKey, setSortKey] = useState<string>('id');
   const [sortAsc, setSortAsc] = useState(true);
+  const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
+  const [staffToDeleteId, setStaffToDeleteId] = useState<number | null>(null);
+  const [formDialog, setFormDialog] = useState<{
+    mode: 'create' | 'edit';
+    staffId?: number;
+  } | null>(null);
+  const [formState, setFormState] = useState<StaffFormState>(getEmptyStaffForm());
+  const [formError, setFormError] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+
+  const selectedStaff = selectedStaffId
+    ? staffs.find((staff) => staff.id === selectedStaffId) ?? null
+    : null;
+  const staffToDelete = staffToDeleteId
+    ? staffs.find((staff) => staff.id === staffToDeleteId) ?? null
+    : null;
 
   if (!hasView) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="ip-card p-8 text-center max-w-md">
-          <h2 className="text-lg font-bold text-ip-text mb-2">Access Denied</h2>
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="ip-card max-w-md p-8 text-center">
+          <h2 className="mb-2 text-lg font-bold text-ip-text">Access Denied</h2>
           <p className="text-sm text-ip-text-secondary">
             You do not have permission to view staffs.
           </p>
@@ -31,23 +73,26 @@ export default function StaffsPage() {
   const handleSort = (key: string) => {
     if (sortKey === key) {
       setSortAsc(!sortAsc);
-    } else {
-      setSortKey(key);
-      setSortAsc(true);
+      return;
     }
+
+    setSortKey(key);
+    setSortAsc(true);
   };
 
   const parkNameMap: Record<number, string> = {};
-  for (const p of PARK_DB) {
-    parkNameMap[p.id] = p.display_name;
+  for (const park of parks) {
+    parkNameMap[park.id] = park.display_name;
   }
 
-  const sorted = [...STAFF_DB].sort((a, b) => {
+  const sorted = [...staffs].sort((a, b) => {
     const aVal = (a as unknown as Record<string, unknown>)[sortKey];
     const bVal = (b as unknown as Record<string, unknown>)[sortKey];
+
     if (typeof aVal === 'string' && typeof bVal === 'string') {
       return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     }
+
     return sortAsc
       ? Number(aVal) - Number(bVal)
       : Number(bVal) - Number(aVal);
@@ -65,31 +110,133 @@ export default function StaffsPage() {
 
   const showActions = hasView || hasEdit || hasDelete;
 
+  const openCreateDialog = () => {
+    setFormDialog({ mode: 'create' });
+    setFormState(getEmptyStaffForm());
+    setFormError('');
+  };
+
+  const openEditDialog = (staff: Staff) => {
+    setFormDialog({ mode: 'edit', staffId: staff.id });
+    setFormState(getStaffFormState(staff));
+    setFormError('');
+  };
+
+  const updateForm = <K extends keyof StaffFormState>(
+    key: K,
+    value: StaffFormState[K]
+  ) => {
+    setFormError('');
+    setFormState((current) => {
+      if (key === 'is_enable' && value === false) {
+        return { ...current, is_enable: false, is_on_shift: false };
+      }
+
+      return { ...current, [key]: value };
+    });
+  };
+
+  const closeFormDialog = () => {
+    setFormDialog(null);
+    setFormError('');
+  };
+
+  const handleSaveStaff = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const editingId = formDialog?.mode === 'edit' ? formDialog.staffId : undefined;
+    const validationError = validateStaffForm(formState, staffs, parks, editingId);
+
+    if (validationError) {
+      setFormError(validationError);
+      return;
+    }
+
+    const nextStaffData = {
+      staff_name: formState.staff_name.trim(),
+      display_name: formState.display_name.trim(),
+      description: formState.description.trim(),
+      at_park_id: Number(formState.at_park_id),
+      start_time: toStoredTime(formState.start_time),
+      end_time: toStoredTime(formState.end_time),
+      role: formState.role.trim(),
+      payment: Number(formState.payment),
+      is_enable: formState.is_enable,
+      is_on_shift: formState.is_enable ? formState.is_on_shift : false,
+    };
+
+    if (formDialog?.mode === 'edit' && formDialog.staffId) {
+      const result = updateStaff(formDialog.staffId, nextStaffData);
+
+      if (!result.ok) {
+        setFormError(result.error || 'Unable to save staff changes.');
+        return;
+      }
+
+      setSelectedStaffId(formDialog.staffId);
+    } else {
+      const result = addStaff(nextStaffData);
+
+      if (!result.ok) {
+        setFormError(result.error || 'Unable to create staff.');
+        return;
+      }
+    }
+
+    closeFormDialog();
+  };
+
+  const handleDeleteStaff = () => {
+    if (!staffToDelete) return;
+
+    const result = deleteStaff(staffToDelete.id);
+
+    if (!result.ok) {
+      setDeleteError(result.error || 'Unable to delete this staff member.');
+      return;
+    }
+
+    if (selectedStaffId === staffToDelete.id) {
+      setSelectedStaffId(null);
+    }
+
+    setDeleteError('');
+    setStaffToDeleteId(null);
+  };
+
+  const availableParks = parks.filter(
+    (park) => park.is_enable || park.id === Number(formState.at_park_id)
+  );
+
   return (
     <div className="ip-fade-in">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-ip-text">Staffs</h1>
-          <p className="text-sm text-ip-text-secondary mt-1">
-            {STAFF_DB.length} staff members registered in the system
+          <p className="mt-1 text-sm text-ip-text-secondary">
+            {staffs.length} staff member{staffs.length === 1 ? '' : 's'} registered
+            in the system
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-ip-text-muted px-3 py-1 bg-ip-bg rounded-full">
-            Read-only mock
+
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="rounded-full bg-ip-bg px-3 py-1 text-xs text-ip-text-muted">
+            Editable Store
           </span>
-          {hasAdd && (
+          {hasAdd ? (
             <button
-              onClick={() => alert('Mock: Add new staff dialog would open here')}
-              className="px-4 py-2 bg-ip-primary hover:bg-ip-primary/90 text-white text-sm font-semibold rounded-lg transition-colors shadow-lg shadow-ip-primary/30"
+              type="button"
+              onClick={openCreateDialog}
+              className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/25 hover:bg-ip-primary/90"
             >
-              + Add Staff
+              <Plus size={16} />
+              Add Staff
             </button>
-          )}
+          ) : null}
         </div>
       </div>
 
-      <div className="ip-card overflow-hidden">
+      <div className="ip-card overflow-hidden rounded-[2rem]">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -98,88 +245,354 @@ export default function StaffsPage() {
                   <th
                     key={col.key}
                     onClick={() => handleSort(col.key)}
-                    className="px-5 py-3.5 text-left font-semibold text-ip-text-secondary cursor-pointer hover:text-ip-text select-none"
+                    className="cursor-pointer select-none px-5 py-3.5 text-left font-semibold text-ip-text-secondary hover:text-ip-text"
                   >
                     <span className="flex items-center gap-1">
                       {col.label}
-                      {sortKey === col.key && (
-                        <span className="text-ip-primary">
-                          {sortAsc ? '↑' : '↓'}
-                        </span>
-                      )}
+                      {sortKey === col.key ? (
+                        <span className="text-ip-primary">{sortAsc ? '↑' : '↓'}</span>
+                      ) : null}
                     </span>
                   </th>
                 ))}
-                {showActions && (
+                {showActions ? (
                   <th className="px-5 py-3.5 text-right font-semibold text-ip-text-secondary">
                     Actions
                   </th>
-                )}
+                ) : null}
               </tr>
             </thead>
             <tbody>
-              {sorted.map((staff) => (
-                <tr
-                  key={staff.id}
-                  className="border-b border-ip-border last:border-0 hover:bg-ip-surface-hover transition-colors"
-                >
-                  <td className="px-5 py-3.5 font-mono text-xs">{staff.id}</td>
-                  <td className="px-5 py-3.5 font-medium text-ip-text">
-                    {staff.display_name}
-                  </td>
-                  <td className="px-5 py-3.5 text-ip-text-secondary">
-                    {parkNameMap[staff.at_park_id] || `Park #${staff.at_park_id}`}
-                  </td>
-                  <td className="px-5 py-3.5">{staff.role}</td>
-                  <td className="px-5 py-3.5">
-                    {staff.payment.toLocaleString()} VND
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <StatusBadge active={staff.is_enable} />
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <StatusBadge active={staff.is_on_shift} />
-                  </td>
-                  {showActions && (
-                    <td className="px-5 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {hasView && (
-                          <button
-                            onClick={() => alert(`Mock: View details for staff ${staff.id}`)}
-                            className="text-ip-text-secondary hover:text-ip-text transition-colors text-xs font-medium"
-                          >
-                            View
-                          </button>
-                        )}
-                        {hasEdit && (
-                          <button
-                            onClick={() => alert(`Mock: Edit staff ${staff.id}`)}
-                            className="text-ip-primary hover:text-ip-primary/80 transition-colors text-xs font-medium px-2 border-l border-ip-border"
-                          >
-                            Edit
-                          </button>
-                        )}
-                        {hasDelete && (
-                          <button
-                            onClick={() => {
-                              if (confirm(`Are you sure you want to delete staff ${staff.id}?`)) {
-                                alert(`Mock: Delete staff ${staff.id}`);
-                              }
-                            }}
-                            className="text-red-500 hover:text-red-600 transition-colors text-xs font-medium pl-2 border-l border-ip-border"
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </div>
+              {sorted.length > 0 ? (
+                sorted.map((staff) => (
+                  <tr
+                    key={staff.id}
+                    className="border-b border-ip-border transition-colors last:border-0 hover:bg-ip-surface-hover"
+                  >
+                    <td className="px-5 py-4 font-mono text-xs">{staff.id}</td>
+                    <td className="px-5 py-4 font-medium text-ip-text">
+                      {staff.display_name}
                     </td>
-                  )}
+                    <td className="px-5 py-4 text-ip-text-secondary">
+                      {parkNameMap[staff.at_park_id] || `Park #${staff.at_park_id}`}
+                    </td>
+                    <td className="px-5 py-4">{staff.role}</td>
+                    <td className="px-5 py-4">
+                      {staff.payment.toLocaleString()} VND
+                    </td>
+                    <td className="px-5 py-4">
+                      <StatusBadge active={staff.is_enable} />
+                    </td>
+                    <td className="px-5 py-4">
+                      <StatusBadge active={staff.is_on_shift} />
+                    </td>
+                    {showActions ? (
+                      <td className="px-5 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {hasView ? (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedStaffId(staff.id)}
+                              className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-text-secondary hover:bg-ip-bg hover:text-ip-text"
+                            >
+                              <Eye size={14} />
+                              View
+                            </button>
+                          ) : null}
+                          {hasEdit ? (
+                            <button
+                              type="button"
+                              onClick={() => openEditDialog(staff)}
+                              className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-primary hover:bg-ip-primary/10"
+                            >
+                              <PencilLine size={14} />
+                              Edit
+                            </button>
+                          ) : null}
+                          {hasDelete ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDeleteError('');
+                                setStaffToDeleteId(staff.id);
+                              }}
+                              className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600"
+                            >
+                              <Trash2 size={14} />
+                              Delete
+                            </button>
+                          ) : null}
+                        </div>
+                      </td>
+                    ) : null}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={showActions ? columns.length + 1 : columns.length}
+                    className="px-6 py-14 text-center text-sm text-ip-text-muted"
+                  >
+                    No staff members available. Add a new staff record to begin.
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      <AppDialog
+        open={selectedStaff !== null}
+        onClose={() => setSelectedStaffId(null)}
+        title={selectedStaff ? selectedStaff.display_name : 'Staff details'}
+        description={
+          selectedStaff
+            ? `Staff #${selectedStaff.id} profile, assignment, and shift metadata.`
+            : undefined
+        }
+        icon={<ShieldCheck size={22} />}
+        size="lg"
+        footer={
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => setSelectedStaffId(null)}
+              className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
+            >
+              Close
+            </button>
+            {hasEdit && selectedStaff ? (
+              <button
+                type="button"
+                onClick={() => {
+                  openEditDialog(selectedStaff);
+                  setSelectedStaffId(null);
+                }}
+                className="ip-btn rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
+              >
+                Edit Staff
+              </button>
+            ) : null}
+          </div>
+        }
+      >
+        {selectedStaff ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            <DetailItem label="Staff Name" value={selectedStaff.staff_name} />
+            <DetailItem label="Display Name" value={selectedStaff.display_name} />
+            <DetailItem label="Role" value={selectedStaff.role} />
+            <DetailItem
+              label="Assigned Park"
+              value={parkNameMap[selectedStaff.at_park_id] || `Park #${selectedStaff.at_park_id}`}
+              icon={<BriefcaseBusiness size={14} />}
+            />
+            <DetailItem label="Description" value={selectedStaff.description} />
+            <DetailItem label="Payment" value={`${selectedStaff.payment.toLocaleString()} VND`} />
+            <DetailItem label="Start Time" value={selectedStaff.start_time} />
+            <DetailItem label="End Time" value={selectedStaff.end_time} />
+            <DetailItem
+              label="Enabled"
+              value={<StatusBadge active={selectedStaff.is_enable} />}
+            />
+            <DetailItem
+              label="On Shift"
+              value={<StatusBadge active={selectedStaff.is_on_shift} />}
+            />
+            <DetailItem label="Created At" value={selectedStaff.created_at} />
+            <DetailItem
+              label="Last Modified"
+              value={selectedStaff.last_modified_at}
+            />
+            <DetailItem
+              label="Last Active"
+              value={selectedStaff.last_active}
+              className="md:col-span-2"
+            />
+          </div>
+        ) : null}
+      </AppDialog>
+
+      <AppDialog
+        open={formDialog !== null}
+        onClose={closeFormDialog}
+        title={formDialog?.mode === 'edit' ? 'Edit Staff' : 'Add Staff'}
+        description={
+          formDialog?.mode === 'edit'
+            ? 'Update staff assignment, shift details, and account status.'
+            : 'Create a new staff record for this demo session.'
+        }
+        icon={
+          formDialog?.mode === 'edit' ? (
+            <PencilLine size={22} />
+          ) : (
+            <Plus size={22} />
+          )
+        }
+        size="lg"
+        footer={
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={closeFormDialog}
+              className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="staff-form"
+              className="ip-btn rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
+            >
+              {formDialog?.mode === 'edit' ? 'Save Changes' : 'Create Staff'}
+            </button>
+          </div>
+        }
+      >
+        <form id="staff-form" onSubmit={handleSaveStaff} className="space-y-5">
+          <div className="grid gap-4 md:grid-cols-2">
+            <FormField label="Staff Name" htmlFor="staff_name" hint="Unique object name using letters, numbers, and underscores.">
+              <input
+                id="staff_name"
+                value={formState.staff_name}
+                onChange={(event) => updateForm('staff_name', event.target.value)}
+                className="ip-input"
+                placeholder="john_doe"
+              />
+            </FormField>
+            <FormField label="Display Name" htmlFor="display_name">
+              <input
+                id="display_name"
+                value={formState.display_name}
+                onChange={(event) =>
+                  updateForm('display_name', event.target.value)
+                }
+                className="ip-input"
+                placeholder="John Doe"
+              />
+            </FormField>
+            <FormField label="Assigned Park" htmlFor="at_park_id">
+              <select
+                id="at_park_id"
+                value={formState.at_park_id}
+                onChange={(event) =>
+                  updateForm('at_park_id', event.target.value)
+                }
+                className="ip-input"
+              >
+                {availableParks.map((park) => (
+                  <option key={park.id} value={park.id}>
+                    {park.display_name}
+                    {park.is_enable ? '' : ' (disabled)'}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            <FormField label="Role" htmlFor="role">
+              <input
+                id="role"
+                value={formState.role}
+                onChange={(event) => updateForm('role', event.target.value)}
+                className="ip-input"
+                placeholder="Attendant"
+              />
+            </FormField>
+            <FormField
+              label="Description"
+              htmlFor="description"
+              className="md:col-span-2"
+            >
+              <textarea
+                id="description"
+                value={formState.description}
+                onChange={(event) =>
+                  updateForm('description', event.target.value)
+                }
+                rows={3}
+                className="ip-input min-h-[104px] resize-y"
+                placeholder="Short description for operations context"
+              />
+            </FormField>
+            <FormField label="Start Time" htmlFor="start_time">
+              <input
+                id="start_time"
+                type="time"
+                value={formState.start_time}
+                onChange={(event) =>
+                  updateForm('start_time', event.target.value)
+                }
+                className="ip-input"
+              />
+            </FormField>
+            <FormField label="End Time" htmlFor="end_time">
+              <input
+                id="end_time"
+                type="time"
+                value={formState.end_time}
+                onChange={(event) => updateForm('end_time', event.target.value)}
+                className="ip-input"
+              />
+            </FormField>
+            <FormField label="Payment (VND)" htmlFor="payment">
+              <input
+                id="payment"
+                type="number"
+                min="0"
+                step="1000"
+                value={formState.payment}
+                onChange={(event) => updateForm('payment', event.target.value)}
+                className="ip-input"
+                placeholder="200000"
+              />
+            </FormField>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <FormToggle
+              label="Enabled"
+              description="Disabled staff remain editable, but they cannot stay on shift."
+              checked={formState.is_enable}
+              onChange={(checked) => updateForm('is_enable', checked)}
+            />
+            <FormToggle
+              label="On Shift"
+              description="On-shift status automatically turns off when the staff member is disabled."
+              checked={formState.is_on_shift}
+              disabled={!formState.is_enable}
+              onChange={(checked) => updateForm('is_on_shift', checked)}
+            />
+          </div>
+
+          {formError ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              {formError}
+            </div>
+          ) : null}
+        </form>
+      </AppDialog>
+
+      <ConfirmDialog
+        open={staffToDelete !== null}
+        onClose={() => {
+          setDeleteError('');
+          setStaffToDeleteId(null);
+        }}
+        onConfirm={handleDeleteStaff}
+        title={staffToDelete ? `Delete ${staffToDelete.display_name}?` : 'Delete staff'}
+        description={
+          staffToDelete
+            ? `Staff #${staffToDelete.id} will be removed from the shared mock database layer for this running session.`
+            : undefined
+        }
+        confirmLabel="Delete Staff"
+        tone="danger"
+      >
+        {deleteError ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {deleteError}
+          </div>
+        ) : null}
+      </ConfirmDialog>
     </div>
   );
 }
@@ -187,18 +600,196 @@ export default function StaffsPage() {
 function StatusBadge({ active }: { active: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
-        active
-          ? 'bg-green-50 text-green-700'
-          : 'bg-red-50 text-red-600'
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
+        active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
       }`}
     >
       <span
-        className={`w-1.5 h-1.5 rounded-full ${
+        className={`h-1.5 w-1.5 rounded-full ${
           active ? 'bg-green-500' : 'bg-red-400'
         }`}
       />
       {active ? 'Yes' : 'No'}
     </span>
   );
+}
+
+function DetailItem({
+  label,
+  value,
+  icon,
+  className = '',
+}: {
+  label: string;
+  value: ReactNode;
+  icon?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`rounded-2xl border border-ip-border bg-ip-bg/60 p-4 ${className}`}>
+      <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.16em] text-ip-text-muted">
+        {icon}
+        {label}
+      </span>
+      <div className="text-sm leading-6 text-ip-text">{value}</div>
+    </div>
+  );
+}
+
+function FormField({
+  label,
+  htmlFor,
+  hint,
+  className = '',
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  hint?: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className={`block ${className}`} htmlFor={htmlFor}>
+      <span className="mb-1.5 block text-sm font-medium text-ip-text">
+        {label}
+      </span>
+      {children}
+      {hint ? (
+        <span className="mt-1.5 block text-xs text-ip-text-muted">{hint}</span>
+      ) : null}
+    </label>
+  );
+}
+
+function FormToggle({
+  label,
+  description,
+  checked,
+  onChange,
+  disabled = false,
+}: {
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="rounded-2xl border border-ip-border bg-ip-bg/60 p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-ip-text">{label}</p>
+          <p className="mt-1 text-xs leading-5 text-ip-text-muted">
+            {description}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            if (!disabled) onChange(!checked);
+          }}
+          disabled={disabled}
+          className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors ${
+            checked
+              ? 'border-transparent bg-ip-primary'
+              : 'border-ip-border bg-ip-surface'
+          } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
+        >
+          <span
+            className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
+              checked ? 'translate-x-6' : 'translate-x-1'
+            }`}
+          />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function getEmptyStaffForm(): StaffFormState {
+  return {
+    staff_name: '',
+    display_name: '',
+    description: '',
+    at_park_id: '1',
+    start_time: '08:00',
+    end_time: '16:00',
+    role: '',
+    payment: '200000',
+    is_enable: true,
+    is_on_shift: true,
+  };
+}
+
+function getStaffFormState(staff: Staff): StaffFormState {
+  return {
+    staff_name: staff.staff_name,
+    display_name: staff.display_name,
+    description: staff.description,
+    at_park_id: String(staff.at_park_id),
+    start_time: toInputTime(staff.start_time),
+    end_time: toInputTime(staff.end_time),
+    role: staff.role,
+    payment: String(staff.payment),
+    is_enable: staff.is_enable,
+    is_on_shift: staff.is_on_shift,
+  };
+}
+
+function validateStaffForm(
+  formState: StaffFormState,
+  staffs: Staff[],
+  parks: { id: number; is_enable: boolean }[],
+  editingId?: number
+) {
+  const staffName = formState.staff_name.trim();
+  const displayName = formState.display_name.trim();
+  const description = formState.description.trim();
+  const role = formState.role.trim();
+  const payment = Number(formState.payment);
+  const parkId = Number(formState.at_park_id);
+  const selectedPark = parks.find((park) => park.id === parkId);
+
+  if (!staffName || !displayName || !description || !role) {
+    return 'Fill in all staff details before saving.';
+  }
+
+  if (!isObjectName(staffName)) {
+    return 'Staff name must use letters, numbers, and underscores only.';
+  }
+
+  if (
+    staffs.some(
+      (staff) => staff.staff_name === staffName && staff.id !== editingId
+    )
+  ) {
+    return 'Staff name must be unique.';
+  }
+
+  if (!selectedPark || !selectedPark.is_enable) {
+    return 'Assign staff only to enabled parks.';
+  }
+
+  if (!Number.isInteger(payment) || payment < 0) {
+    return 'Payment must be a positive whole number or zero.';
+  }
+
+  if (!formState.start_time || !formState.end_time) {
+    return 'Start and end times are required.';
+  }
+
+  return null;
+}
+
+function toInputTime(value: string) {
+  return value.slice(0, 5);
+}
+
+function toStoredTime(value: string) {
+  return value.length === 5 ? `${value}:00` : value;
+}
+
+function isObjectName(value: string) {
+  return /^[A-Za-z0-9_]+$/.test(value);
 }

@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import { LogOut, ShieldAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { AppDialog, type DialogTone } from '@/components/dialogs/AppDialog';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSystemStateStore } from '@/stores/system-state-store';
 import { useUserStore } from '@/stores/user-store';
 
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
+export default function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { session, logout } = useAuthStore();
   const { getGlobalState } = useSystemStateStore();
@@ -16,25 +18,19 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!session.isAuthenticated || !session.user) {
       router.replace('/login');
-      return;
     }
+  }, [router, session.isAuthenticated, session.user]);
 
-    // Maintenance Mode Kick Logic
-    if (maintenanceMode && session.user.group !== 'admins') {
-      alert("System is under maintenance. You have been logged out.");
-      logout(() => {}); // Set online is handled or ignored on forced logout
-      router.replace('/login');
-      return;
-    }
+  const guardNotice = getGuardNotice({
+    sessionUser: session.user,
+    maintenanceMode,
+    getUser,
+  });
 
-    // Disabled/Offline Kick Logic (Revoke access)
-    const currentUser = getUser(session.user.id);
-    if (currentUser && (!currentUser.is_enable || !currentUser.is_online)) {
-      alert("Your session has been revoked or your account is disabled.");
-      logout(() => {});
-      router.replace('/login');
-    }
-  }, [session.isAuthenticated, session.user, maintenanceMode, router, logout, getUser]);
+  const handleAcknowledge = () => {
+    logout(() => {});
+    router.replace('/login');
+  };
 
   if (!session.isAuthenticated) {
     return (
@@ -44,5 +40,95 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+
+      <AppDialog
+        open={guardNotice !== null}
+        onClose={handleAcknowledge}
+        title={guardNotice?.title ?? 'Access changed'}
+        description={guardNotice?.description}
+        icon={
+          guardNotice?.tone === 'danger' ? (
+            <ShieldAlert size={22} />
+          ) : (
+            <LogOut size={22} />
+          )
+        }
+        tone={guardNotice?.tone ?? 'warning'}
+        size="sm"
+        dismissible={false}
+        footer={
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleAcknowledge}
+              className="ip-btn rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
+            >
+              Return to Login
+            </button>
+          </div>
+        }
+      />
+    </>
+  );
+}
+
+function getGuardNotice({
+  sessionUser,
+  maintenanceMode,
+  getUser,
+}: {
+  sessionUser: ReturnType<typeof useAuthStore.getState>['session']['user'];
+  maintenanceMode: boolean | undefined;
+  getUser: ReturnType<typeof useUserStore.getState>['getUser'];
+}): {
+  title: string;
+  description: string;
+  tone: DialogTone;
+} | null {
+  if (!sessionUser) {
+    return null;
+  }
+
+  if (maintenanceMode && sessionUser.group !== 'admins') {
+    return {
+      title: 'Maintenance mode is active',
+      description:
+        'This area is temporarily unavailable for non-admin users. You will be signed out and returned to login.',
+      tone: 'warning',
+    };
+  }
+
+  const currentUser = getUser(sessionUser.id);
+
+  if (!currentUser) {
+    return {
+      title: 'Account removed',
+      description:
+        'Your account no longer exists in the live user store. You will be signed out and returned to login.',
+      tone: 'danger',
+    };
+  }
+
+  if (!currentUser.is_enable) {
+    return {
+      title: 'Account disabled',
+      description:
+        'An administrator disabled this account. You will be signed out and returned to login.',
+      tone: 'danger',
+    };
+  }
+
+  if (!currentUser.is_online) {
+    return {
+      title: 'Session revoked',
+      description:
+        'Your current access session was revoked. You will be signed out and returned to login.',
+      tone: 'warning',
+    };
+  }
+
+  return null;
 }

@@ -102,7 +102,7 @@ export const EVENT_DB: EventDef[] = [
   },
   {
     id: 12,
-    event_code: '00c',
+    event_code: '012',
     event_name: 'System Execution Failed',
     event_type: 'error',
     error_code: '0x0003',

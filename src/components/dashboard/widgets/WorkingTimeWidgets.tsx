@@ -1,24 +1,30 @@
 import React, { useMemo } from 'react';
 import { WorkingTimeDataSource } from '@/types/database';
-import { PARK_DB } from '@/data/mock-parks';
+import { parseTimeToMinutes } from '@/lib/ipark-utils';
+import { useParkStore } from '@/stores/park-store';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
-  // Resolve park from datasource
-  const park = ds.park !== 'ALL' ? PARK_DB.find(p => p.id.toString() === ds.park && p.is_enable) : null;
+  const { parks } = useParkStore();
+  const enabledParks = parks.filter((park) => park.is_enable);
+  const park = ds.park !== 'ALL'
+    ? enabledParks.find((item) => item.id.toString() === ds.park)
+    : null;
+  const targetParks = ds.park === 'ALL' ? enabledParks : park ? [park] : [];
+  const workingHours = targetParks.map((item) => {
+    const diffInMinutes = parseTimeToMinutes(item.end_time) - parseTimeToMinutes(item.start_time);
+    return diffInMinutes > 0 ? diffInMinutes / 60 : 0;
+  });
 
-  // Stable chart data
   const chartData = useMemo(
     () => Array.from({ length: 7 }).map((_, i) => ({
       name: `Wk ${i + 1}`,
-      time: Math.floor(Math.random() * 40) + 80,
+      time: Math.round((workingHours[0] ?? 12) * (0.9 + Math.random() * 0.3)),
     })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ds.park]
+    [workingHours]
   );
 
   if (ds.type === 'start_end_time') {
-    // Read real start/end times from PARK_DB
     const startTime = park?.start_time?.slice(0, 5) ?? '06:00';
     const endTime = park?.end_time?.slice(0, 5) ?? '18:00';
     const parkName = park?.display_name ?? 'All Parks';
@@ -45,15 +51,10 @@ export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
   }
 
   if (ds.type === 'curr_total_working_time') {
-    // Calculate from park start/end times
-    let totalHours = 0;
-    if (park) {
-      const [sh, sm] = (park.start_time ?? '06:00:00').split(':').map(Number);
-      const [eh, em] = (park.end_time ?? '18:00:00').split(':').map(Number);
-      totalHours = (eh * 60 + em - sh * 60 - sm) / 60;
-    } else {
-      totalHours = 12; // default
-    }
+    const totalHours =
+      workingHours.length > 0
+        ? Math.round((workingHours.reduce((sum, value) => sum + value, 0) / workingHours.length) * 10) / 10
+        : 0;
     return (
       <div className="flex flex-col items-center justify-center text-center">
         <div className="text-4xl font-bold text-ip-primary">
@@ -67,19 +68,27 @@ export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
   }
 
   if (ds.type === 'stats_curr_total_working_time') {
+    const lowest = workingHours.length ? Math.min(...workingHours) : 0;
+    const highest = workingHours.length ? Math.max(...workingHours) : 0;
+    const average = workingHours.length
+      ? Math.round(
+          (workingHours.reduce((sum, value) => sum + value, 0) / workingHours.length) * 10
+        ) / 10
+      : 0;
+
     return (
       <div className="flex justify-between items-center w-full px-2">
         <div className="text-center">
           <p className="text-[10px] text-ip-text-muted uppercase">Lowest</p>
-          <p className="text-lg font-semibold text-ip-text-secondary">90 {ds.unit}</p>
+          <p className="text-lg font-semibold text-ip-text-secondary">{lowest} {ds.unit}</p>
         </div>
         <div className="text-center border-x border-ip-border px-4">
           <p className="text-[10px] text-ip-text-muted uppercase">Average</p>
-          <p className="text-xl font-bold text-ip-primary">110 {ds.unit}</p>
+          <p className="text-xl font-bold text-ip-primary">{average} {ds.unit}</p>
         </div>
         <div className="text-center">
           <p className="text-[10px] text-ip-text-muted uppercase">Highest</p>
-          <p className="text-lg font-semibold text-ip-text-secondary">125 {ds.unit}</p>
+          <p className="text-lg font-semibold text-ip-text-secondary">{highest} {ds.unit}</p>
         </div>
       </div>
     );
@@ -105,4 +114,3 @@ export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
 
   return <div className="text-xs text-ip-text-muted text-center">Unknown Working Time Widget</div>;
 }
-

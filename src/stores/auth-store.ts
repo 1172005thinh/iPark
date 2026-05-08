@@ -2,7 +2,9 @@
 
 import { create } from 'zustand';
 import type { User, Permission, LoginAttemptTracker, AuthSession } from '@/types/database';
-import { GROUP_DB } from '@/data/mock-groups';
+import { useGroupStore } from '@/stores/group-store';
+import { useUserStore } from '@/stores/user-store';
+import { nowTimestamp } from '@/lib/ipark-utils';
 
 interface AuthStore {
   session: AuthSession;
@@ -17,21 +19,19 @@ interface AuthStore {
   logout: (setOnline: (id: number, online: boolean) => void) => void;
   isBlocked: () => boolean;
   hasPermission: (permission: Permission) => boolean;
+  refreshSessionFromStores: () => void;
 }
 
 const BLOCK_DURATION_MS = 1 * 60 * 1000; // 1 minute for demo (docs say 30 min, but demo = shorter)
 const MAX_ATTEMPTS = 5;
 
-const now = () => {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+const getPermissions = (groupName: string): Permission[] => {
+  return useGroupStore.getState().getPermissionsForGroup(groupName);
 };
 
-const getPermissions = (groupName: string): Permission[] => {
-  const group = GROUP_DB.find((g) => g.group_name === groupName && g.is_enable);
-  return group ? group.permissions_list : [];
-};
+const samePermissions = (left: Permission[], right: Permission[]) =>
+  left.length === right.length &&
+  left.every((permission, index) => permission === right[index]);
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   session: {
@@ -71,7 +71,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         description: `Login attempt failed for username: ${userName}`,
         at_park_id: 1,
         extra_info: `Username: ${userName}, Attempt: ${newAttempts}/${MAX_ATTEMPTS}`,
-        sent_time: now(),
+        sent_time: nowTimestamp(),
         is_acknowledged: false,
       });
 
@@ -87,7 +87,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           description: `IP blocked after ${MAX_ATTEMPTS} failed login attempts`,
           at_park_id: 1,
           extra_info: `Username: ${userName}, Blocked for ${BLOCK_DURATION_MS / 60000} minute(s)`,
-          sent_time: now(),
+          sent_time: nowTimestamp(),
           is_acknowledged: false,
         });
 
@@ -105,8 +105,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
 
     // Successful login
+    const assignedGroup = useGroupStore.getState().getGroupByName(user.group);
+    if (!assignedGroup || !assignedGroup.is_enable) {
+      return {
+        success: false,
+        error: 'Your account group has been disabled. Contact an administrator.',
+      };
+    }
+
     const permissions = getPermissions(user.group);
     setOnline(user.id, true);
+    useGroupStore.getState().touchGroupActivity(user.group);
 
     // Log successful login event
     logEvent({
@@ -117,12 +126,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       description: `User ${user.display_name} logged in successfully`,
       at_park_id: 1,
       extra_info: `User ID: ${user.id}`,
-      sent_time: now(),
+      sent_time: nowTimestamp(),
       is_acknowledged: false,
     });
 
+    const currentUser = useUserStore.getState().getUser(user.id) ?? user;
     set({
-      session: { user, permissions, isAuthenticated: true },
+      session: { user: currentUser, permissions, isAuthenticated: true },
       loginTracker: { attempts: 0, blockedUntil: null },
     });
 
@@ -150,6 +160,66 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   hasPermission: (permission) => {
-    return get().session.permissions.includes(permission);
+    const sessionUser = get().session.user;
+    if (!sessionUser) {
+      return false;
+    }
+
+    return getPermissions(sessionUser.group).includes(permission);
+  },
+
+  refreshSessionFromStores: () => {
+    const { session } = get();
+    if (!session.user) {
+      return;
+    }
+
+    const currentUser = useUserStore.getState().getUser(session.user.id);
+    if (!currentUser || !currentUser.is_enable || !currentUser.is_online) {
+      set({
+        session: { user: null, permissions: [], isAuthenticated: false },
+      });
+      return;
+    }
+
+    const assignedGroup = useGroupStore.getState().getGroupByName(currentUser.group);
+    if (!assignedGroup || !assignedGroup.is_enable) {
+      set({
+        session: {
+          user: currentUser,
+          permissions: [],
+          isAuthenticated: true,
+        },
+      });
+      return;
+    }
+
+    const permissions = getPermissions(currentUser.group);
+    const shouldUpdate =
+      session.user !== currentUser ||
+      !samePermissions(session.permissions, permissions) ||
+      !session.isAuthenticated;
+
+    if (shouldUpdate) {
+      set({
+        session: {
+          user: currentUser,
+          permissions,
+          isAuthenticated: true,
+        },
+      });
+    }
   },
 }));
+
+const refreshSession = () => {
+  useAuthStore.getState().refreshSessionFromStores();
+};
+
+useGroupStore.subscribe(() => {
+  refreshSession();
+});
+
+useUserStore.subscribe(() => {
+  refreshSession();
+});

@@ -337,7 +337,7 @@ Quick actions:
 
 ## 7. DATABASE
 
-*DEMONSTRATION HYBRID APPROACH*: Due to development time constraints, the system uses a hybrid database approach. Most databases are **read-only** (hardcoded with sample data, where adding/deleting/editing actions are simply mocked and do not persist). However, to demonstrate critical interactive features, `USER_DB`, `EVENT_HISTORY_DB`, and `SYSTEM_STATE_DB` **are editable** and should persist data (such as login failures, event acknowledgements, settings changes, and device toggles) during the demo session.
+*DEMONSTRATION DATABASES*: All databases are functional in the demo. Each table is backed by a live in-memory store, so add/edit/delete actions persist during the demo session. Seed data is loaded on startup, and UI mutations update the active store immediately.
 
 *NOTE*: If `is_enable` is `false`, the respective status flag (`is_operating`, `is_on_shift`, or `is_online`) is `false` and can not be `true` until `is_enable` is `true`. Moreover, false `is_enable` means the entry is disabled and can not be assigned to other related database entries, but the entry can still be viewed and edited in the system. For example, if a park is disabled, the park can not be assigned to staff members and widgets, but the park can still be viewed and edited in the system.
 

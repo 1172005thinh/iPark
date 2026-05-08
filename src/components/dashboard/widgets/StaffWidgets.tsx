@@ -1,27 +1,24 @@
 import React, { useMemo } from 'react';
 import { StaffDataSource } from '@/types/database';
-import { STAFF_DB } from '@/data/mock-staffs';
+import { useStaffStore } from '@/stores/staff-store';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
-  // Resolve staff from datasource
+  const { staffs } = useStaffStore();
   const allStaff = ds.park === 'ALL'
-    ? STAFF_DB.filter(s => s.is_enable)
-    : STAFF_DB.filter(s => s.at_park_id.toString() === ds.park && s.is_enable);
+    ? staffs.filter((staff) => staff.is_enable)
+    : staffs.filter((staff) => staff.at_park_id.toString() === ds.park && staff.is_enable);
 
   const currStaff = allStaff.filter(s => s.is_on_shift).length;
   const maxStaff = allStaff.length;
 
-  // Total estimated payroll (payment per shift, money type = VND)
   const totalPayment = allStaff.reduce((sum, s) => sum + s.payment, 0);
 
-  // Stable chart data
   const chartData = useMemo(
     () => Array.from({ length: 7 }).map((_, i) => ({
       name: `${ds.interval === 'hour' ? 'H' : ds.interval === 'week' ? 'Wk' : ds.interval === 'month' ? 'Mo' : 'D'}${i + 1}`,
       staff: Math.floor(maxStaff * (0.3 + Math.random() * 0.7)),
     })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [maxStaff, ds.interval]
   );
 
@@ -30,7 +27,6 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
       name: `Month ${i + 1}`,
       payroll: Math.floor(totalPayment * (0.9 + Math.random() * 0.3)),
     })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [totalPayment]
   );
 
@@ -120,4 +116,3 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
 
   return <div className="text-xs text-ip-text-muted text-center">Unknown Staff Widget</div>;
 }
-

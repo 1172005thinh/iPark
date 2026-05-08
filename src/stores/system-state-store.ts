@@ -2,17 +2,15 @@
 
 import { create } from 'zustand';
 import type { SystemState } from '@/types/database';
-
-const now = () => {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-};
+import { cloneSeed, now } from '@/lib/ipark-store-helpers';
 
 interface SystemStateStore {
   states: SystemState[];
   getGlobalState: () => SystemState | undefined;
   getParkState: (parkId: number) => SystemState | undefined;
+  ensureParkState: (parkId: number) => void;
+  removeParkState: (parkId: number) => void;
+  disableParkDevices: (parkId: number) => void;
   toggleMaintenanceMode: (value: boolean) => void;
   toggleEmergencyMode: (value: boolean) => void;
   toggleLights: (parkId: number, value: boolean) => void;
@@ -64,11 +62,53 @@ const initialStates: SystemState[] = [
 ];
 
 export const useSystemStateStore = create<SystemStateStore>((set, get) => ({
-  states: initialStates,
+  states: cloneSeed(initialStates),
 
   getGlobalState: () => get().states.find((s) => s.park_id === 0),
 
   getParkState: (parkId) => get().states.find((s) => s.park_id === parkId),
+
+  ensureParkState: (parkId) => {
+    if (parkId < 1 || get().states.some((state) => state.park_id === parkId)) {
+      return;
+    }
+
+    set((state) => ({
+      states: [
+        ...state.states,
+        {
+          id: state.states.reduce((maxId, item) => Math.max(maxId, item.id), 0) + 1,
+          park_id: parkId,
+          maintenance_mode: false,
+          emergency_mode: false,
+          lights_on: false,
+          cameras_on: false,
+          sensors_on: false,
+          last_modified_at: now(),
+        },
+      ],
+    }));
+  },
+
+  removeParkState: (parkId) =>
+    set((state) => ({
+      states: state.states.filter((item) => item.park_id !== parkId),
+    })),
+
+  disableParkDevices: (parkId) =>
+    set((state) => ({
+      states: state.states.map((item) =>
+        item.park_id === parkId
+          ? {
+              ...item,
+              lights_on: false,
+              cameras_on: false,
+              sensors_on: false,
+              last_modified_at: now(),
+            }
+          : item,
+      ),
+    })),
 
   toggleMaintenanceMode: (value) =>
     set((state) => ({

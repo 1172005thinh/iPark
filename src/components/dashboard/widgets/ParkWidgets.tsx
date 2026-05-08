@@ -1,30 +1,26 @@
 import React, { useMemo } from 'react';
 import { ParkDataSource } from '@/types/database';
-import { PARK_DB } from '@/data/mock-parks';
+import { useParkStore } from '@/stores/park-store';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function ParkWidgets({ ds }: { ds: ParkDataSource }) {
-  // Resolve parks from datasource — 'ALL' means aggregate, otherwise specific park
+  const { parks: allParks } = useParkStore();
   const parks = ds.park === 'ALL'
-    ? PARK_DB.filter(p => p.is_enable)
-    : PARK_DB.filter(p => p.id.toString() === ds.park && p.is_enable);
+    ? allParks.filter((park) => park.is_enable)
+    : allParks.filter((park) => park.id.toString() === ds.park && park.is_enable);
 
   const totalMaxSlot = parks.reduce((sum, p) => sum + p.max_slot, 0);
 
-  // Stable mock slot usage (seeded per park list so no re-render flicker)
   const mockCurrSlot = useMemo(
     () => Math.floor(totalMaxSlot * (0.3 + Math.random() * 0.5)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [totalMaxSlot]
   );
 
-  // Stable chart data
   const chartData = useMemo(
     () => Array.from({ length: 7 }).map((_, i) => ({
       name: `${ds.interval === 'hour' ? 'H' : ds.interval === 'week' ? 'Wk' : ds.interval === 'month' ? 'Mo' : 'D'}${i + 1}`,
       val: Math.floor(totalMaxSlot * (0.2 + Math.random() * 0.6)),
     })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [totalMaxSlot, ds.interval]
   );
 
@@ -88,4 +84,3 @@ export function ParkWidgets({ ds }: { ds: ParkDataSource }) {
 
   return <div className="text-xs text-ip-text-muted text-center">Unknown Park Widget</div>;
 }
-

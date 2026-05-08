@@ -2,24 +2,23 @@
 
 import { create } from 'zustand';
 import type { User } from '@/types/database';
-
-const now = () => {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-};
+import { cloneSeed, normalizeUser } from '@/lib/ipark-store-helpers';
+import { isValidEmail, isValidPassword, nowTimestamp } from '@/lib/ipark-utils';
 
 interface UserStore {
   users: User[];
   getUser: (id: number) => User | undefined;
   getUserByName: (userName: string) => User | undefined;
   getUserByEmail: (email: string) => User | undefined;
+  getUsersByGroup: (groupName: string) => User[];
   updateUser: (id: number, updates: Partial<User>) => void;
   addUser: (user: Omit<User, 'id' | 'created_at' | 'last_modified_at' | 'last_active'>) => void;
   deleteUser: (id: number) => void;
   setOnline: (id: number, online: boolean) => void;
   disableUser: (id: number) => void;
   enableUser: (id: number) => void;
+  renameUsersGroup: (previousGroupName: string, nextGroupName: string) => void;
+  reassignPinnedDashboard: (previousDashboardId: number, nextDashboardId: number) => void;
 }
 
 const initialUsers: User[] = [
@@ -94,7 +93,7 @@ const initialUsers: User[] = [
 ];
 
 export const useUserStore = create<UserStore>((set, get) => ({
-  users: initialUsers,
+  users: cloneSeed(initialUsers).map((user) => normalizeUser(user)),
 
   getUser: (id) => get().users.find((u) => u.id === id),
 
@@ -102,23 +101,41 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
   getUserByEmail: (email) => get().users.find((u) => u.email === email),
 
+  getUsersByGroup: (groupName) => get().users.filter((u) => u.group === groupName),
+
   updateUser: (id, updates) =>
     set((state) => ({
-      users: state.users.map((u) =>
-        u.id === id ? { ...u, ...updates, last_modified_at: now() } : u
-      ),
+      users: state.users.map((u) => {
+        if (u.id !== id) return u;
+
+        const nextEmail = updates.email ?? u.email;
+        const nextPassword = updates.password ?? u.password;
+        const nextEnable = updates.is_enable ?? u.is_enable;
+        const nextOnline = nextEnable ? (updates.is_online ?? u.is_online) : false;
+
+        return normalizeUser({
+          ...u,
+          ...updates,
+          email: isValidEmail(nextEmail) ? nextEmail : u.email,
+          password: isValidPassword(nextPassword) ? nextPassword : u.password,
+          is_enable: nextEnable,
+          is_online: nextOnline,
+          last_modified_at: nowTimestamp(),
+        });
+      }),
     })),
 
   addUser: (user) =>
     set((state) => {
       const maxId = state.users.reduce((max, u) => Math.max(max, u.id), 0);
-      const newUser: User = {
+      const newUser: User = normalizeUser({
         ...user,
         id: maxId + 1,
-        created_at: now(),
-        last_modified_at: now(),
-        last_active: now(),
-      };
+        is_online: user.is_enable ? user.is_online : false,
+        created_at: nowTimestamp(),
+        last_modified_at: nowTimestamp(),
+        last_active: nowTimestamp(),
+      });
       return { users: [...state.users, newUser] };
     }),
 
@@ -131,7 +148,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
         if (u.id !== id) return u;
         // Cascade: disabled users cannot be online
         if (!u.is_enable && online) return u;
-        return { ...u, is_online: online, last_active: now(), last_modified_at: now() };
+        return normalizeUser({
+          ...u,
+          is_online: online,
+          last_active: nowTimestamp(),
+          last_modified_at: nowTimestamp(),
+        });
       }),
     })),
 
@@ -139,7 +161,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
     set((state) => ({
       users: state.users.map((u) =>
         u.id === id
-          ? { ...u, is_enable: false, is_online: false, last_modified_at: now() }
+          ? normalizeUser({
+              ...u,
+              is_enable: false,
+              is_online: false,
+              last_modified_at: nowTimestamp(),
+            })
           : u
       ),
     })),
@@ -148,7 +175,37 @@ export const useUserStore = create<UserStore>((set, get) => ({
     set((state) => ({
       users: state.users.map((u) =>
         u.id === id
-          ? { ...u, is_enable: true, last_modified_at: now() }
+          ? normalizeUser({
+              ...u,
+              is_enable: true,
+              last_modified_at: nowTimestamp(),
+            })
+          : u
+      ),
+    })),
+
+  renameUsersGroup: (previousGroupName, nextGroupName) =>
+    set((state) => ({
+      users: state.users.map((u) =>
+        u.group === previousGroupName
+          ? {
+              ...u,
+              group: nextGroupName,
+              last_modified_at: nowTimestamp(),
+            }
+          : u
+      ),
+    })),
+
+  reassignPinnedDashboard: (previousDashboardId, nextDashboardId) =>
+    set((state) => ({
+      users: state.users.map((u) =>
+        u.pinned_dashboard_id === previousDashboardId
+          ? {
+              ...u,
+              pinned_dashboard_id: nextDashboardId,
+              last_modified_at: nowTimestamp(),
+            }
           : u
       ),
     })),

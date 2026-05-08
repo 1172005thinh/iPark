@@ -1,25 +1,22 @@
 import React, { useMemo } from 'react';
 import { FeeDataSource } from '@/types/database';
-import { PARK_DB } from '@/data/mock-parks';
+import { useParkStore } from '@/stores/park-store';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
-  // Resolve park from datasource
-  const park = ds.park !== 'ALL' ? PARK_DB.find(p => p.id.toString() === ds.park && p.is_enable) : null;
-  const enabledParks = PARK_DB.filter(p => p.is_enable);
+  const { parks } = useParkStore();
+  const park = ds.park !== 'ALL' ? parks.find((item) => item.id.toString() === ds.park && item.is_enable) : null;
+  const enabledParks = parks.filter((item) => item.is_enable);
 
-  // Stable mock income data
   const incomeData = useMemo(
     () => Array.from({ length: 7 }).map((_, i) => ({
       name: `${ds.interval === 'hour' ? 'H' : ds.interval === 'week' ? 'Wk' : ds.interval === 'month' ? 'Mo' : 'D'}${i + 1}`,
       income: Math.floor(Math.random() * 5000000) + 1000000,
     })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ds.interval, ds.park]
   );
 
   if (ds.type === 'curr_fee') {
-    // Fee from PARK_DB (money type, stored as integer in VND)
     const fee = park?.fee ?? (enabledParks[0]?.fee ?? 0);
     const parkName = park?.display_name ?? 'All Parks';
     return (
@@ -35,7 +32,6 @@ export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
   }
 
   if (ds.type === 'estimate_income') {
-    // Estimate: fee × average daily entries (mocked as max_slot * 0.4 per day per park)
     const totalFee = ds.park === 'ALL'
       ? enabledParks.reduce((sum, p) => sum + p.fee * Math.floor(p.max_slot * 0.4), 0)
       : (park ? park.fee * Math.floor(park.max_slot * 0.4) : 0);
@@ -77,4 +73,3 @@ export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
 
   return <div className="text-xs text-ip-text-muted text-center">Unknown Fee Widget</div>;
 }
-

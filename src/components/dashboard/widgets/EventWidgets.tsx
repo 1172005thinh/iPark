@@ -5,12 +5,11 @@ import { useEventHistoryStore } from '@/stores/event-history-store';
 export function EventWidgets({ ds }: { ds: EventDataSource }) {
   const { events } = useEventHistoryStore();
   
-  // Filter events based on park (if not ALL) and event_type
-  const filteredEvents = events.filter(e => {
+  const filteredEvents = [...events].filter(e => {
     if (ds.park !== 'ALL' && e.at_park_id.toString() !== ds.park) return false;
     if (ds.event_type && ds.event_type !== 'all' && e.event_type !== ds.event_type) return false;
     return true;
-  });
+  }).sort((left, right) => right.received_time.localeCompare(left.received_time));
 
   if (ds.type === 'curr_event') {
     const latestEvent = filteredEvents[0];

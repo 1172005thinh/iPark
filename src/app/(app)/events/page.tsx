@@ -1,13 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
+import { Download, Trash2 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
 import { useAuthStore } from '@/stores/auth-store';
 import { useEventHistoryStore } from '@/stores/event-history-store';
-import { PARK_DB } from '@/data/mock-parks';
+import { useParkStore } from '@/stores/park-store';
 
 export default function EventsPage() {
   const { session } = useAuthStore();
   const { events, acknowledgeEvent, deleteEvent } = useEventHistoryStore();
+  const parks = useParkStore((state) => state.parks);
   const hasView = session.permissions.includes('view_events');
   const hasExport = session.permissions.includes('export_events');
   const hasDelete = session.permissions.includes('delete_events');
@@ -15,6 +18,9 @@ export default function EventsPage() {
   const [sortKey, setSortKey] = useState<string>('id');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<number | null>(null);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   if (!hasView) {
     return (
@@ -28,7 +34,9 @@ export default function EventsPage() {
   }
 
   const parkMap: Record<number, string> = {};
-  PARK_DB.forEach((p) => { parkMap[p.id] = p.display_name; });
+  parks.forEach((park) => {
+    parkMap[park.id] = park.display_name;
+  });
 
   const handleSort = (key: string) => {
     if (sortKey === key) setSortAsc(!sortAsc);
@@ -40,12 +48,9 @@ export default function EventsPage() {
     acknowledgeEvent(id);
   };
 
-  const handleDelete = (id: number, e?: React.MouseEvent) => {
+  const handleDeleteRequest = (id: number, e?: MouseEvent) => {
     if (e) e.stopPropagation();
-    if (confirm(`Are you sure you want to delete event ${id}?`)) {
-      deleteEvent(id);
-      if (selectedId === id) setSelectedId(null);
-    }
+    setEventToDelete(id);
   };
 
   const sorted = [...events].sort((a, b) => {
@@ -67,7 +72,74 @@ export default function EventsPage() {
   };
 
   const selected = events.find((e) => e.id === selectedId);
+  const deleteTarget = events.find((e) => e.id === eventToDelete) ?? null;
   const showActions = hasDelete;
+
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+
+    deleteEvent(deleteTarget.id);
+    if (selectedId === deleteTarget.id) setSelectedId(null);
+    setEventToDelete(null);
+  };
+
+  const handleExport = () => {
+    setIsExporting(true);
+
+    const csvRows = [
+      [
+        'id',
+        'event_code',
+        'event_name',
+        'event_type',
+        'error_code',
+        'description',
+        'park_name',
+        'extra_info',
+        'sent_time',
+        'received_time',
+        'is_acknowledged',
+      ],
+      ...events.map((event) => [
+        String(event.id),
+        event.event_code,
+        event.event_name,
+        event.event_type,
+        event.error_code,
+        event.description,
+        parkMap[event.at_park_id] || `Park #${event.at_park_id}`,
+        event.extra_info,
+        event.sent_time,
+        event.received_time,
+        event.is_acknowledged ? 'true' : 'false',
+      ]),
+    ];
+
+    const csv = csvRows
+      .map((row) =>
+        row
+          .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+          .join(',')
+      )
+      .join('\n');
+
+    const filename = `ipark-events-${new Date()
+      .toISOString()
+      .replace(/[:.]/g, '-')}.csv`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+
+    setExportNotice(`Exported ${events.length} events to ${filename}.`);
+    setIsExporting(false);
+  };
 
   return (
     <div className="ip-fade-in">
@@ -77,14 +149,20 @@ export default function EventsPage() {
           <p className="text-sm text-ip-text-secondary mt-1">
             {events.length} events — {events.filter((e) => !e.is_acknowledged).length} unacknowledged
           </p>
+          {exportNotice && (
+            <p className="mt-2 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              {exportNotice}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {hasExport && (
             <button
-              onClick={() => alert('Mock: Exporting events to CSV...')}
-              className="px-4 py-2 bg-ip-surface-hover hover:bg-ip-border/50 text-ip-text text-sm font-semibold rounded-lg transition-colors border border-ip-border"
+              onClick={handleExport}
+              className="ip-btn flex items-center gap-2 rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-semibold text-ip-text transition-colors hover:bg-ip-surface-hover"
             >
-              Export CSV
+              <Download size={16} />
+              {isExporting ? 'Exporting...' : 'Export CSV'}
             </button>
           )}
         </div>
@@ -122,9 +200,10 @@ export default function EventsPage() {
                       <div className="flex items-center justify-end gap-2">
                         {hasDelete && (
                           <button
-                            onClick={(e) => handleDelete(ev.id, e)}
-                            className="text-red-500 hover:text-red-600 transition-colors text-xs font-medium"
+                            onClick={(e) => handleDeleteRequest(ev.id, e)}
+                            className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600"
                           >
+                            <Trash2 size={14} />
                             Delete
                           </button>
                         )}
@@ -145,9 +224,10 @@ export default function EventsPage() {
             <div className="flex items-center gap-3">
               {hasDelete && (
                 <button
-                  onClick={() => handleDelete(selected.id)}
-                  className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded transition-colors"
+                  onClick={() => handleDeleteRequest(selected.id)}
+                  className="ip-btn flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100"
                 >
+                  <Trash2 size={14} />
                   Delete Event
                 </button>
               )}
@@ -166,6 +246,20 @@ export default function EventsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onClose={() => setEventToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title={deleteTarget ? `Delete event ${deleteTarget.id}?` : 'Delete event'}
+        description={
+          deleteTarget
+            ? `${deleteTarget.event_name} will be removed from the live event history store immediately.`
+            : undefined
+        }
+        confirmLabel="Delete Event"
+        tone="danger"
+      />
     </div>
   );
 }

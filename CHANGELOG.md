@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [0.5.0] — 2026-05-08 — Phase 5: Settings & Live Data Expansion
+
+### Summary
+
+Completed **Phase 5** — confirmed Settings and system-state wiring, expanded the live database model to cover all tables, and unified dashboard dialogs with the shared modal components.
+
+### Added
+
+- **Dashboard dialogs** now use the shared `AppDialog` and `ConfirmDialog` components for add/delete actions.
+
+### Changed
+
+- **Events View (`/events`)** now maps park names from the live `PARK_DB` store to reflect park edits immediately.
+- **Database documentation** updated to reflect that all tables are live-editable during the demo session.
+
+### Fixed
+
+- Corrected invalid event code `00c` to `012` in `EVENT_DB` and `EVENT_HISTORY_DB` seed data to comply with the 3-digit format rule.
+
+---
+
 ## [0.4.0] — 2026-05-08 — Phase 4: Entity Management Views
 
 ### Summary
