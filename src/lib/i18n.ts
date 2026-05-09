@@ -91,6 +91,8 @@ const translations = {
     forgot_password_title: 'Reset Password',
     forgot_password_desc: 'Enter your registered email to reset your password to default.',
     reset_password: 'Reset Password',
+    pin: 'Pin',
+    unpin: 'Unpin',
   },
   vi: {
     dashboard: 'Bảng điều khiển',
@@ -179,6 +181,8 @@ const translations = {
     forgot_password_title: 'Khôi phục mật khẩu',
     forgot_password_desc: 'Nhập email đã đăng ký để đặt lại mật khẩu về mặc định.',
     reset_password: 'Đặt lại mật khẩu',
+    pin: 'Ghim',
+    unpin: 'Bỏ',
   },
 };
 

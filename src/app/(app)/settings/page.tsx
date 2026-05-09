@@ -600,7 +600,7 @@ export default function SettingsPage() {
           <div className="grid gap-x-12 gap-y-2 md:grid-cols-2">
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
               <span className="text-sm text-ip-text-secondary">Version</span>
-              <span className="text-sm font-medium text-ip-text">v1.2.5 (Stable)</span>
+              <span className="text-sm font-medium text-ip-text">v1.2.6 (Stable)</span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
               <span className="text-sm text-ip-text-secondary">Release Type</span>

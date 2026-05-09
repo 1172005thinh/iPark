@@ -222,7 +222,7 @@ export default function DashboardPage() {
             }`}
           >
             <Pin size={16} className={activeUser?.pinned_dashboard_id === currentDashboard.id ? 'fill-current' : ''} />
-            {t('pin' as any) || 'Pin'}
+            {activeUser?.pinned_dashboard_id === currentDashboard.id ? t('unpin') : t('pin')}
           </button>
 
           {hasAdd && (

@@ -97,4 +97,20 @@ export const STAFF_DB: Staff[] = [
     last_active: '2026-03-01 17:00:00',
     is_on_shift: false,
   },
+  {
+    id: 7,
+    staff_name: 'tony_pham',
+    display_name: 'Tony Pham',
+    description: 'Supervisor at the south park',
+    at_park_id: 3,
+    start_time: '06:00:00',
+    end_time: '14:00:00',
+    role: 'Supervisor',
+    payment: 400000,
+    is_enable: true,
+    created_at: '2026-02-01 00:00:00',
+    last_modified_at: '2026-02-15 08:00:00',
+    last_active: '2026-03-01 14:00:00',
+    is_on_shift: true,
+  }
 ];

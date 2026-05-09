@@ -77,6 +77,7 @@ export default function ParksPage() {
   const [formState, setFormState] = useState<ParkFormState>(getEmptyParkForm());
   const [formError, setFormError] = useState('');
   const [deleteError, setDeleteError] = useState('');
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   const selectedPark = selectedParkId
     ? parks.find((park) => park.id === selectedParkId) ?? null
@@ -224,12 +225,7 @@ export default function ParksPage() {
               <div className="h-4 w-[1px] bg-ip-border mx-1" />
               <button
                 type="button"
-                onClick={() => {
-                  if (confirm(t('bulk_delete_confirm').replace('{count}', String(selectedIds.size)))) {
-                    selectedIds.forEach(id => deletePark(id as number));
-                    clearSelection();
-                  }
-                }}
+                onClick={() => setShowBulkDeleteConfirm(true)}
                 className="ip-btn rounded-lg bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
                 title={t('delete')}
               >
@@ -655,6 +651,23 @@ export default function ParksPage() {
           </div>
         ) : null}
       </ConfirmDialog>
+
+      <ConfirmDialog
+        open={showBulkDeleteConfirm}
+        onClose={() => setShowBulkDeleteConfirm(false)}
+        onConfirm={() => {
+          selectedIds.forEach((id) => deletePark(id as number));
+          clearSelection();
+          setShowBulkDeleteConfirm(false);
+        }}
+        title={t('delete')}
+        description={t('bulk_delete_confirm').replace(
+          '{count}',
+          String(selectedIds.size)
+        )}
+        tone="danger"
+        confirmLabel={t('delete')}
+      />
     </div>
   );
 }

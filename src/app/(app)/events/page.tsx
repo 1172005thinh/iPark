@@ -49,6 +49,7 @@ export default function EventsPage() {
   const [eventToDelete, setEventToDelete] = useState<number | null>(null);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   if (!hasView) {
     return (
@@ -199,12 +200,7 @@ export default function EventsPage() {
           <div className="flex items-center gap-3">
             {hasDelete && (
               <button
-                onClick={() => {
-                  if (confirm(t('bulk_delete_confirm').replace('{count}', String(selectedIds.size)))) {
-                    selectedIds.forEach(id => deleteEvent(id as number));
-                    clearSelection();
-                  }
-                }}
+                onClick={() => setShowBulkDeleteConfirm(true)}
                 className="flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-sm font-semibold transition-colors hover:bg-white/30"
               >
                 <Trash2 size={16} />
@@ -374,6 +370,23 @@ export default function EventsPage() {
         }
         confirmLabel="Delete Event"
         tone="danger"
+      />
+
+      <ConfirmDialog
+        open={showBulkDeleteConfirm}
+        onClose={() => setShowBulkDeleteConfirm(false)}
+        onConfirm={() => {
+          selectedIds.forEach((id) => deleteEvent(id as number));
+          clearSelection();
+          setShowBulkDeleteConfirm(false);
+        }}
+        title={t('delete')}
+        description={t('bulk_delete_confirm').replace(
+          '{count}',
+          String(selectedIds.size)
+        )}
+        tone="danger"
+        confirmLabel={t('delete')}
       />
     </div>
   );
