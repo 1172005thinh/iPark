@@ -39,6 +39,7 @@ interface StaffStore {
   setStaffEnabled: (id: number, isEnable: boolean) => StoreMutationResult<Staff>;
   setStaffShift: (id: number, isOnShift: boolean) => StoreMutationResult<Staff>;
   touchStaffActivity: (id: number) => void;
+  refreshData: () => void;
 }
 
 const initialStaffs = cloneSeed(STAFF_DB).map((staff) => normalizeStaff(staff));
@@ -218,6 +219,32 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
           : item,
       ),
     }));
+  },
+
+  refreshData: () => {
+    const { staffs } = get();
+    const parks = useParkStore.getState().parks;
+    const parkMap = new Map(parks.map(p => [p.id, p]));
+    const timestamp = now();
+
+    const nextStaffs = staffs.map(staff => {
+      if (!staff.is_enable) return staff;
+      
+      const park = parkMap.get(staff.at_park_id);
+      if (!park || !park.is_operating) {
+        return { ...staff, is_on_shift: false, last_active: timestamp, last_modified_at: timestamp };
+      }
+
+      const shouldChangeShift = Math.random() > 0.8;
+      return {
+        ...staff,
+        is_on_shift: shouldChangeShift ? !staff.is_on_shift : staff.is_on_shift,
+        last_active: timestamp,
+        last_modified_at: timestamp,
+      };
+    });
+
+    set({ staffs: nextStaffs });
   },
 }));
 

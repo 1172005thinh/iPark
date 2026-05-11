@@ -68,7 +68,7 @@ const initialDashboards = cloneSeed(DASHBOARD_DB).map((dashboard) =>
   normalizeDashboard(dashboard),
 );
 
-const widgetsRequireSpecificPark = new Set(['EVENT', 'MISC']);
+const widgetsRequireSpecificPark = new Set<string>([]);
 const switchesRequiringSpecificPark = new Set([
   'turn_onoff_lights',
   'turn_onoff_cameras',

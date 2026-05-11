@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type MouseEvent, type ReactNode } from 'react';
-import { Download, Eye, Trash2, Info } from 'lucide-react';
+import { Download, Eye, Trash2, Info, CheckCheck } from 'lucide-react';
 import { AppDialog } from '@/components/dialogs/AppDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
 import { useAuthStore } from '@/stores/auth-store';
@@ -13,7 +13,7 @@ import { useTranslation } from '@/lib/i18n';
 
 export default function EventsPage() {
   const { session } = useAuthStore();
-  const { events, acknowledgeEvent, deleteEvent } = useEventHistoryStore();
+  const { events, acknowledgeEvent, deleteEvent, bulkAcknowledgeEvents } = useEventHistoryStore();
   const parks = useParkStore((state) => state.parks);
   const { t } = useTranslation();
   const hasView = session.permissions.includes('view_events');
@@ -88,6 +88,15 @@ export default function EventsPage() {
     info: 'bg-blue-50 text-blue-700', warning: 'bg-amber-50 text-amber-700', error: 'bg-red-50 text-red-600',
   };
 
+  const getEventTypeName = (type: string) => {
+    switch (type) {
+      case 'error': return t('error_lc');
+      case 'warning': return t('warning_lc');
+      case 'info': return t('info_lc');
+      default: return type;
+    }
+  };
+
   const selected = events.find((e) => e.id === selectedId);
   const deleteTarget = events.find((e) => e.id === eventToDelete) ?? null;
   const showActions = hasView || hasDelete;
@@ -124,7 +133,7 @@ export default function EventsPage() {
         event.event_type,
         event.error_code,
         event.description,
-        parkMap[event.at_park_id] || `Park #${event.at_park_id}`,
+        parkMap[event.at_park_id] || `${t('park')} #${event.at_park_id}`,
         event.extra_info,
         event.sent_time,
         event.received_time,
@@ -154,7 +163,7 @@ export default function EventsPage() {
     link.remove();
     URL.revokeObjectURL(url);
 
-    setExportNotice(`Exported ${events.length} events to ${filename}.`);
+    setExportNotice(t('exported_events_msg').replace('{count}', events.length.toString()).replace('{filename}', filename));
     setIsExporting(false);
   };
 
@@ -162,9 +171,9 @@ export default function EventsPage() {
     <div className="ip-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-ip-text">Events</h1>
+          <h1 className="text-2xl font-bold text-ip-text">{t('events')}</h1>
           <p className="text-sm text-ip-text-secondary mt-1">
-            {events.length} events — {events.filter((e) => !e.is_acknowledged).length} unacknowledged
+            {events.length} {t('events')} — {events.filter((e) => !e.is_acknowledged).length} {t('unacknowledged')}
           </p>
           {exportNotice && (
             <p className="mt-2 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
@@ -179,7 +188,7 @@ export default function EventsPage() {
               className="ip-btn flex items-center gap-2 rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-semibold text-ip-text transition-colors hover:bg-ip-surface-hover"
             >
               <Download size={16} />
-              {isExporting ? 'Exporting...' : 'Export CSV'}
+              {isExporting ? t('exporting') : t('export_csv')}
             </button>
           )}
         </div>
@@ -198,6 +207,16 @@ export default function EventsPage() {
             </button>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                bulkAcknowledgeEvents(Array.from(selectedIds) as number[]);
+                clearSelection();
+              }}
+              className="flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-sm font-semibold transition-colors hover:bg-white/30"
+            >
+              <CheckCheck size={16} />
+              {t('acknowledge_all')}
+            </button>
             {hasDelete && (
               <button
                 onClick={() => setShowBulkDeleteConfirm(true)}
@@ -234,7 +253,7 @@ export default function EventsPage() {
                 ))}
                 {showActions && (
                   <th className="px-5 py-3.5 text-right font-semibold text-ip-text-secondary">
-                    Actions
+                    {t('actions')}
                   </th>
                 )}
               </tr>
@@ -256,7 +275,7 @@ export default function EventsPage() {
                   <td className="px-5 py-4 font-mono text-xs">{ev.id}</td>
                   <td className="px-5 py-4 font-mono text-xs">{ev.event_code}</td>
                   <td className="px-5 py-4 text-ip-text">{ev.event_name}</td>
-                  <td className="px-5 py-4"><span className={`text-xs font-medium px-2.5 py-1 rounded-full ${typeColors[ev.event_type] || ''}`}>{ev.event_type}</span></td>
+                  <td className="px-5 py-4"><span className={`text-xs font-medium px-2.5 py-1 rounded-full ${typeColors[ev.event_type] || ''}`}>{getEventTypeName(ev.event_type)}</span></td>
                   <td className="px-5 py-4 text-ip-text-secondary">{parkMap[ev.at_park_id] || `#${ev.at_park_id}`}</td>
                   <td className="px-5 py-4 text-ip-text-secondary text-xs">{ev.received_time}</td>
                   <td className="px-5 py-4">{ev.is_acknowledged ? <span className="text-green-500">✓</span> : <span className="text-ip-text-muted">—</span>}</td>
@@ -272,7 +291,7 @@ export default function EventsPage() {
                             className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-text-secondary hover:bg-ip-bg hover:text-ip-text"
                           >
                             <Eye size={14} />
-                            View
+                            {t('view')}
                           </button>
                         )}
                         {hasDelete && (
@@ -282,7 +301,7 @@ export default function EventsPage() {
                             className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${isSelectionMode ? 'text-ip-text-muted cursor-not-allowed' : 'text-red-500 hover:bg-red-50 hover:text-red-600'}`}
                           >
                             <Trash2 size={14} />
-                            Delete
+                            {t('delete')}
                           </button>
                         )}
                       </div>
@@ -306,10 +325,10 @@ export default function EventsPage() {
       <AppDialog
         open={selected !== undefined}
         onClose={() => setSelectedId(null)}
-        title={selected ? selected.event_name : 'Event details'}
+        title={selected ? selected.event_name : t('event_details')}
         description={
           selected
-            ? `Event #${selected.id} captured on ${selected.received_time}.`
+            ? t('event_details_desc').replace('{id}', selected.id.toString()).replace('{time}', selected.received_time)
             : undefined
         }
         icon={<Info size={22} />}
@@ -321,7 +340,7 @@ export default function EventsPage() {
               onClick={() => setSelectedId(null)}
               className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
             >
-              Close
+              {t('close')}
             </button>
             {hasDelete && selected ? (
               <button
@@ -333,7 +352,7 @@ export default function EventsPage() {
                 }}
                 className={`ip-btn rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${isSelectionMode ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-red-50 text-red-600 hover:bg-red-100'}`}
               >
-                Delete Event
+                {t('delete_event')}
               </button>
             ) : null}
           </div>
@@ -341,19 +360,19 @@ export default function EventsPage() {
       >
         {selected ? (
           <div className="grid gap-4 md:grid-cols-2">
-            <DetailItem label="Event Name" value={selected.event_name} />
-            <DetailItem label="Event Code" value={selected.event_code} />
+            <DetailItem label={t('event_name')} value={selected.event_name} />
+            <DetailItem label={t('event_code')} value={selected.event_code} />
             <DetailItem 
-              label="Type" 
-              value={<span className={`text-xs font-medium px-2.5 py-1 rounded-full ${typeColors[selected.event_type] || ''}`}>{selected.event_type}</span>} 
+              label={t('type')} 
+              value={<span className={`text-xs font-medium px-2.5 py-1 rounded-full ${typeColors[selected.event_type] || ''}`}>{getEventTypeName(selected.event_type)}</span>} 
             />
-            <DetailItem label="Error Code" value={selected.error_code} />
-            <DetailItem label="Park" value={parkMap[selected.at_park_id] || 'Unknown'} />
-            <DetailItem label="Received Time" value={selected.received_time} />
-            <DetailItem label="Sent Time" value={selected.sent_time} />
-            <DetailItem label="Acknowledged" value={<StatusBadge active={selected.is_acknowledged} />} />
-            <DetailItem label="Description" value={selected.description} className="md:col-span-2" />
-            {selected.extra_info && <DetailItem label="Extra Info" value={selected.extra_info} className="md:col-span-2" />}
+            <DetailItem label={t('error_code')} value={selected.error_code} />
+            <DetailItem label={t('park')} value={parkMap[selected.at_park_id] || t('unknown')} />
+            <DetailItem label={t('received_time')} value={selected.received_time} />
+            <DetailItem label={t('sent_time')} value={selected.sent_time} />
+            <DetailItem label={t('acknowledged')} value={<StatusBadge active={selected.is_acknowledged} t={t} />} />
+            <DetailItem label={t('description')} value={selected.description} className="md:col-span-2" />
+            {selected.extra_info && <DetailItem label={t('extra_info')} value={selected.extra_info} className="md:col-span-2" />}
           </div>
         ) : null}
       </AppDialog>
@@ -362,13 +381,13 @@ export default function EventsPage() {
         open={deleteTarget !== null}
         onClose={() => setEventToDelete(null)}
         onConfirm={handleConfirmDelete}
-        title={deleteTarget ? `Delete event ${deleteTarget.id}?` : 'Delete event'}
+        title={deleteTarget ? t('delete_confirm_title').replace('{name}', deleteTarget.id.toString()) : t('delete_event')}
         description={
           deleteTarget
-            ? `${deleteTarget.event_name} will be removed from the live event history store immediately.`
+            ? t('delete_event_desc').replace('{name}', deleteTarget.event_name)
             : undefined
         }
-        confirmLabel="Delete Event"
+        confirmLabel={t('delete_event')}
         tone="danger"
       />
 
@@ -392,7 +411,7 @@ export default function EventsPage() {
   );
 }
 
-function StatusBadge({ active }: { active: boolean }) {
+function StatusBadge({ active, t }: { active: boolean; t: any }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -404,7 +423,7 @@ function StatusBadge({ active }: { active: boolean }) {
           active ? 'bg-green-500' : 'bg-red-400'
         }`}
       />
-      {active ? 'Yes' : 'No'}
+      {active ? t('yes') : t('no')}
     </span>
   );
 }

@@ -38,6 +38,7 @@ interface ParkStore {
   setParkEnabled: (id: number, isEnable: boolean) => StoreMutationResult<Park>;
   setParkOperating: (id: number, isOperating: boolean) => StoreMutationResult<Park>;
   touchParkActivity: (id: number) => void;
+  refreshData: () => void;
 }
 
 const initialParks = cloneSeed(PARK_DB).map((park) => normalizePark(park));
@@ -207,5 +208,26 @@ export const useParkStore = create<ParkStore>((set, get) => ({
           : item,
       ),
     }));
+  },
+
+  refreshData: () => {
+    const { parks } = get();
+    const timestamp = now();
+    const nextParks = parks.map(park => {
+      if (!park.is_enable) return park;
+      
+      const shouldChangeOperating = Math.random() > 0.7;
+      const feeChange = (Math.floor(Math.random() * 3) - 1) * 1000; // -1000, 0, +1000
+      
+      return {
+        ...park,
+        is_operating: shouldChangeOperating ? !park.is_operating : park.is_operating,
+        fee: Math.max(1000, park.fee + feeChange),
+        last_active: timestamp,
+        last_modified_at: timestamp,
+      };
+    });
+
+    set({ parks: nextParks });
   },
 }));

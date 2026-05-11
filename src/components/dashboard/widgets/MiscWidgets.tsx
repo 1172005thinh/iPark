@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { MiscDataSource } from '@/types/database';
+import { useTranslation } from '@/lib/i18n';
 
 export function MiscWidgets({ ds }: { ds: MiscDataSource }) {
+  const { t, langCode } = useTranslation();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -12,8 +14,16 @@ export function MiscWidgets({ ds }: { ds: MiscDataSource }) {
   }, [ds.type]);
 
   if (ds.type === 'curr_time') {
-    const timeString = time.toLocaleTimeString('en-US', { hour12: false });
-    const dateString = time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const format = ds.format || 'HH:mm:ss';
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: format.includes('A'),
+      second: format.includes(':ss') ? '2-digit' : undefined,
+    };
+    
+    const timeString = time.toLocaleTimeString(langCode === 'vi' ? 'vi-VN' : 'en-US', timeOptions);
+    const dateString = time.toLocaleDateString(langCode === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     
     return (
       <div className="flex flex-col items-center justify-center text-center">
@@ -29,9 +39,9 @@ export function MiscWidgets({ ds }: { ds: MiscDataSource }) {
 
   if (ds.type === 'curr_weather') {
     const weathers = [
-      { temp: '28°C', condition: 'Sunny', icon: '☀️', color: 'text-yellow-500' },
-      { temp: '24°C', condition: 'Cloudy', icon: '☁️', color: 'text-gray-400' },
-      { temp: '22°C', condition: 'Rainy', icon: '🌧️', color: 'text-blue-400' }
+      { temp: '28°C', condition: t('sunny'), icon: '☀️', color: 'text-yellow-500' },
+      { temp: '24°C', condition: t('cloudy'), icon: '☁️', color: 'text-gray-400' },
+      { temp: '22°C', condition: t('rainy'), icon: '🌧️', color: 'text-blue-400' }
     ];
     // Random but stable per mount
     const [w] = useState(() => weathers[Math.floor(Math.random() * weathers.length)]);
@@ -47,5 +57,5 @@ export function MiscWidgets({ ds }: { ds: MiscDataSource }) {
     );
   }
 
-  return <div>Unknown Misc Widget</div>;
+  return <div className="text-center text-xs text-ip-text-muted">{t('unknown_widget')}</div>;
 }

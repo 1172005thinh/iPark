@@ -177,7 +177,7 @@ export default function StaffsPage() {
       const result = updateStaff(formDialog.staffId, nextStaffData);
 
       if (!result.ok) {
-        setFormError(result.error || 'Unable to save staff changes.');
+        setFormError(result.error || t('error_saving_changes'));
         return;
       }
 
@@ -186,7 +186,7 @@ export default function StaffsPage() {
       const result = addStaff(nextStaffData);
 
       if (!result.ok) {
-        setFormError(result.error || 'Unable to create staff.');
+        setFormError(result.error || t('error_creating_entry'));
         return;
       }
     }
@@ -200,7 +200,7 @@ export default function StaffsPage() {
     const result = deleteStaff(staffToDelete.id);
 
     if (!result.ok) {
-      setDeleteError(result.error || 'Unable to delete this staff member.');
+      setDeleteError(result.error || t('error_deleting_entry'));
       return;
     }
 
@@ -328,17 +328,17 @@ export default function StaffsPage() {
                       {staff.display_name}
                     </td>
                     <td className="px-5 py-4 text-ip-text-secondary">
-                      {parkNameMap[staff.at_park_id] || `Park #${staff.at_park_id}`}
+                      {parkNameMap[staff.at_park_id] || `${t('park')} #${staff.at_park_id}`}
                     </td>
                     <td className="px-5 py-4">{staff.role}</td>
                     <td className="px-5 py-4">
                       {staff.payment.toLocaleString()} VND
                     </td>
                     <td className="px-5 py-4">
-                      <StatusBadge active={staff.is_enable} />
+                      <StatusBadge active={staff.is_enable} t={t} />
                     </td>
                     <td className="px-5 py-4">
-                      <StatusBadge active={staff.is_on_shift} />
+                      <StatusBadge active={staff.is_on_shift} t={t} />
                     </td>
                     {showActions ? (
                       <td className="px-5 py-4 text-right">
@@ -350,7 +350,7 @@ export default function StaffsPage() {
                               className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-text-secondary hover:bg-ip-bg hover:text-ip-text"
                             >
                               <Eye size={14} />
-                              View
+                              {t('view')}
                             </button>
                           ) : null}
                           {hasEdit ? (
@@ -361,7 +361,7 @@ export default function StaffsPage() {
                               className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-primary hover:bg-ip-primary/10 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                             >
                               <PencilLine size={14} />
-                              Edit
+                              {t('edit')}
                             </button>
                           ) : null}
                           {hasDelete ? (
@@ -375,7 +375,7 @@ export default function StaffsPage() {
                               className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                             >
                               <Trash2 size={14} />
-                              Delete
+                              {t('delete')}
                             </button>
                           ) : null}
                         </div>
@@ -389,7 +389,7 @@ export default function StaffsPage() {
                     colSpan={showActions ? columns.length + 2 : columns.length + 1}
                     className="px-6 py-14 text-center text-sm text-ip-text-muted"
                   >
-                    No staff members available. Add a new staff record to begin.
+                    {t('no_staff_found')}
                   </td>
                 </tr>
               )}
@@ -409,10 +409,10 @@ export default function StaffsPage() {
       <AppDialog
         open={selectedStaff !== null}
         onClose={() => setSelectedStaffId(null)}
-        title={selectedStaff ? selectedStaff.display_name : 'Staff details'}
+        title={selectedStaff ? selectedStaff.display_name : t('staff_details')}
         description={
           selectedStaff
-            ? `Staff #${selectedStaff.id} profile, assignment, and shift metadata.`
+            ? t('staff_details_desc').replace('{id}', selectedStaff.id.toString())
             : undefined
         }
         icon={<ShieldCheck size={22} />}
@@ -424,7 +424,7 @@ export default function StaffsPage() {
               onClick={() => setSelectedStaffId(null)}
               className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
             >
-              Close
+              {t('close')}
             </button>
             {hasEdit && selectedStaff ? (
               <button
@@ -440,7 +440,7 @@ export default function StaffsPage() {
                     : 'bg-ip-primary text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90'
                 }`}
               >
-                {selectedIds.size > 0 ? 'Edit Disabled' : 'Edit Staff'}
+                {selectedIds.size > 0 ? t('edit_disabled') : t('edit_staff')}
               </button>
             ) : null}
           </div>
@@ -448,33 +448,33 @@ export default function StaffsPage() {
       >
         {selectedStaff ? (
           <div className="grid gap-4 md:grid-cols-2">
-            <DetailItem label="Staff Name" value={selectedStaff.staff_name} />
-            <DetailItem label="Display Name" value={selectedStaff.display_name} />
-            <DetailItem label="Role" value={selectedStaff.role} />
+            <DetailItem label={t('staff_name')} value={selectedStaff.staff_name} />
+            <DetailItem label={t('display_name')} value={selectedStaff.display_name} />
+            <DetailItem label={t('role')} value={selectedStaff.role} />
             <DetailItem
-              label="Assigned Park"
-              value={parkNameMap[selectedStaff.at_park_id] || `Park #${selectedStaff.at_park_id}`}
+              label={t('assigned_park')}
+              value={parkNameMap[selectedStaff.at_park_id] || `${t('park')} #${selectedStaff.at_park_id}`}
               icon={<BriefcaseBusiness size={14} />}
             />
-            <DetailItem label="Description" value={selectedStaff.description} />
-            <DetailItem label="Payment" value={`${selectedStaff.payment.toLocaleString()} VND`} />
-            <DetailItem label="Start Time" value={selectedStaff.start_time} />
-            <DetailItem label="End Time" value={selectedStaff.end_time} />
+            <DetailItem label={t('description')} value={selectedStaff.description} />
+            <DetailItem label={t('payment')} value={`${selectedStaff.payment.toLocaleString()} VND`} />
+            <DetailItem label={t('start_time')} value={selectedStaff.start_time} />
+            <DetailItem label={t('end_time')} value={selectedStaff.end_time} />
             <DetailItem
-              label="Enabled"
-              value={<StatusBadge active={selectedStaff.is_enable} />}
+              label={t('enabled')}
+              value={<StatusBadge active={selectedStaff.is_enable} t={t} />}
             />
             <DetailItem
-              label="On Shift"
-              value={<StatusBadge active={selectedStaff.is_on_shift} />}
+              label={t('on_shift')}
+              value={<StatusBadge active={selectedStaff.is_on_shift} t={t} />}
             />
-            <DetailItem label="Created At" value={selectedStaff.created_at} />
+            <DetailItem label={t('created_at')} value={selectedStaff.created_at} />
             <DetailItem
-              label="Last Modified"
+              label={t('last_modified')}
               value={selectedStaff.last_modified_at}
             />
             <DetailItem
-              label="Last Active"
+              label={t('last_active')}
               value={selectedStaff.last_active}
               className="md:col-span-2"
             />
@@ -485,11 +485,11 @@ export default function StaffsPage() {
       <AppDialog
         open={formDialog !== null}
         onClose={closeFormDialog}
-        title={formDialog?.mode === 'edit' ? 'Edit Staff' : 'Add Staff'}
+        title={formDialog?.mode === 'edit' ? t('edit_staff') : t('add_staff')}
         description={
           formDialog?.mode === 'edit'
-            ? 'Update staff assignment, shift details, and account status.'
-            : 'Create a new staff record for this demo session.'
+            ? t('edit_staff_desc')
+            : t('add_staff_desc')
         }
         icon={
           formDialog?.mode === 'edit' ? (
@@ -506,21 +506,21 @@ export default function StaffsPage() {
               onClick={closeFormDialog}
               className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
               form="staff-form"
               className="ip-btn rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
             >
-              {formDialog?.mode === 'edit' ? 'Save Changes' : 'Create Staff'}
+              {formDialog?.mode === 'edit' ? t('save_changes') : t('create_staff')}
             </button>
           </div>
         }
       >
         <form id="staff-form" onSubmit={handleSaveStaff} className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Staff Name" htmlFor="staff_name" hint="Unique object name using letters, numbers, and underscores.">
+            <FormField label={t('staff_name')} htmlFor="staff_name" hint={t('staff_name_hint')}>
               <input
                 id="staff_name"
                 value={formState.staff_name}
@@ -529,7 +529,7 @@ export default function StaffsPage() {
                 placeholder="john_doe"
               />
             </FormField>
-            <FormField label="Display Name" htmlFor="display_name">
+            <FormField label={t('display_name')} htmlFor="display_name">
               <input
                 id="display_name"
                 value={formState.display_name}
@@ -540,7 +540,7 @@ export default function StaffsPage() {
                 placeholder="John Doe"
               />
             </FormField>
-            <FormField label="Assigned Park" htmlFor="at_park_id">
+            <FormField label={t('assigned_park')} htmlFor="at_park_id">
               <select
                 id="at_park_id"
                 value={formState.at_park_id}
@@ -552,12 +552,12 @@ export default function StaffsPage() {
                 {availableParks.map((park) => (
                   <option key={park.id} value={park.id}>
                     {park.display_name}
-                    {park.is_enable ? '' : ' (disabled)'}
+                    {park.is_enable ? '' : ` (${t('disabled')})`}
                   </option>
                 ))}
               </select>
             </FormField>
-            <FormField label="Role" htmlFor="role">
+            <FormField label={t('role')} htmlFor="role">
               <input
                 id="role"
                 value={formState.role}
@@ -567,7 +567,7 @@ export default function StaffsPage() {
               />
             </FormField>
             <FormField
-              label="Description"
+              label={t('description')}
               htmlFor="description"
               className="md:col-span-2"
             >
@@ -579,10 +579,10 @@ export default function StaffsPage() {
                 }
                 rows={3}
                 className="ip-input min-h-[104px] resize-y"
-                placeholder="Short description for operations context"
+                placeholder={t('staff_desc_placeholder')}
               />
             </FormField>
-            <FormField label="Start Time" htmlFor="start_time">
+            <FormField label={t('start_time')} htmlFor="start_time">
               <input
                 id="start_time"
                 type="time"
@@ -591,18 +591,20 @@ export default function StaffsPage() {
                   updateForm('start_time', event.target.value)
                 }
                 className="ip-input"
+                placeholder="08:00"
               />
             </FormField>
-            <FormField label="End Time" htmlFor="end_time">
+            <FormField label={t('end_time')} htmlFor="end_time">
               <input
                 id="end_time"
                 type="time"
                 value={formState.end_time}
                 onChange={(event) => updateForm('end_time', event.target.value)}
                 className="ip-input"
+                placeholder="17:00"
               />
             </FormField>
-            <FormField label="Payment (VND)" htmlFor="payment">
+            <FormField label={t('payment_vnd')} htmlFor="payment">
               <input
                 id="payment"
                 type="number"
@@ -618,14 +620,14 @@ export default function StaffsPage() {
 
           <div className="grid gap-3 md:grid-cols-2">
             <FormToggle
-              label="Enabled"
-              description="Disabled staff remain editable, but they cannot stay on shift."
+              label={t('enabled')}
+              description={t('staff_enabled_desc')}
               checked={formState.is_enable}
               onChange={(checked) => updateForm('is_enable', checked)}
             />
             <FormToggle
-              label="On Shift"
-              description="On-shift status automatically turns off when the staff member is disabled."
+              label={t('on_shift')}
+              description={t('staff_on_shift_desc')}
               checked={formState.is_on_shift}
               disabled={!formState.is_enable}
               onChange={(checked) => updateForm('is_on_shift', checked)}
@@ -647,13 +649,13 @@ export default function StaffsPage() {
           setStaffToDeleteId(null);
         }}
         onConfirm={handleDeleteStaff}
-        title={staffToDelete ? `Delete ${staffToDelete.display_name}?` : 'Delete staff'}
+        title={staffToDelete ? t('delete_confirm_title').replace('{name}', staffToDelete.display_name) : t('delete_staff')}
         description={
           staffToDelete
-            ? `Staff #${staffToDelete.id} will be removed from the shared mock database layer for this running session.`
+            ? t('delete_staff_desc').replace('{id}', staffToDelete.id.toString())
             : undefined
         }
-        confirmLabel="Delete Staff"
+        confirmLabel={t('delete_staff')}
         tone="danger"
       >
         {deleteError ? (
@@ -683,7 +685,7 @@ export default function StaffsPage() {
   );
 }
 
-function StatusBadge({ active }: { active: boolean }) {
+function StatusBadge({ active, t }: { active: boolean; t: any }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -695,7 +697,7 @@ function StatusBadge({ active }: { active: boolean }) {
           active ? 'bg-green-500' : 'bg-red-400'
         }`}
       />
-      {active ? 'Yes' : 'No'}
+      {active ? t('yes') : t('no')}
     </span>
   );
 }

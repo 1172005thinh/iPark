@@ -23,7 +23,7 @@ export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
     const fee = isAll 
       ? (enabledParks.length > 0 ? Math.round(enabledParks.reduce((sum, p) => sum + p.fee, 0) / enabledParks.length) : 0)
       : (park?.fee ?? 0);
-    const parkLabel = isAll ? t('all_parks_avg') : (park?.display_name ?? 'Unknown Park');
+    const parkLabel = isAll ? t('all_parks_avg') : (park?.display_name ?? t('no_results'));
     
     return (
       <div className="flex flex-col items-center justify-center text-center">
@@ -43,12 +43,12 @@ export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
       : (park ? park.fee * Math.floor(park.max_slot * 0.4) : 0);
     return (
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="text-xl text-ip-text-secondary">Est. Income</div>
+        <div className="text-xl text-ip-text-secondary">{t('est_income')}</div>
         <div className="text-4xl font-black text-ip-success mt-2 drop-shadow-sm">
           {totalFee.toLocaleString()} <span className="text-xl text-ip-text-secondary">{ds.unit}</span>
         </div>
         <div className="text-[10px] bg-ip-success/10 text-ip-success px-2 py-1 rounded-full mt-2">
-          Per {ds.interval}
+          {t('per')} {t(ds.interval as any)}
         </div>
       </div>
     );
@@ -68,7 +68,7 @@ export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
             />
             <Tooltip
               contentStyle={{ background: 'var(--ip-card)', border: '1px solid var(--ip-border)', borderRadius: '8px' }}
-              formatter={(value: any) => [`${value.toLocaleString()} ${ds.unit}`, 'Income']}
+              formatter={(value: any) => [`${value.toLocaleString()} ${ds.unit}`, t('income')]}
             />
             <Line type="monotone" dataKey="income" stroke="var(--ip-success)" strokeWidth={3} dot={{ r: 4, fill: 'var(--ip-card)', strokeWidth: 2 }} activeDot={{ r: 6 }} />
           </LineChart>
@@ -77,5 +77,5 @@ export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
     );
   }
 
-  return <div className="text-xs text-ip-text-muted text-center">Unknown Fee Widget</div>;
+  return <div className="text-xs text-ip-text-muted text-center">{t('unknown_widget')}</div>;
 }

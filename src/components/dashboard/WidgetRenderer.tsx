@@ -86,7 +86,7 @@ export function WidgetRenderer({ config, isEditing, dashboardId }: WidgetRendere
             </button>
           </div>
           
-          {/* Bottom Left: Park & Interval Selectors (Blended) */}
+          {/* Bottom Left: Park, Interval, and Format Selectors (Blended) */}
           <div className="absolute bottom-2 left-2 z-20 flex items-center gap-4 whitespace-nowrap">
             {showParkSelect && (
               <select
@@ -113,6 +113,19 @@ export function WidgetRenderer({ config, isEditing, dashboardId }: WidgetRendere
                 <option value="day">{t('day')}</option>
                 <option value="week">{t('week')}</option>
                 <option value="month">{t('month')}</option>
+              </select>
+            )}
+
+            {'format' in ds && (
+              <select
+                value={(ds as any).format || 'default'}
+                onChange={(e) => handleUpdateDataSource({ format: e.target.value })}
+                className="text-[10px] ip-dropdown-blend focus:outline-none"
+              >
+                <option value="default">{t('default')}</option>
+                <option value="HH:mm">{t('format_hh_mm')}</option>
+                <option value="HH:mm:ss">{t('format_hh_mm_ss')}</option>
+                <option value="hh:mm A">{t('format_hh_mm_a')}</option>
               </select>
             )}
           </div>

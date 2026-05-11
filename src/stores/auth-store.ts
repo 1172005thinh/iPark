@@ -19,6 +19,11 @@ interface AuthStore {
   logout: (setOnline: (id: number, online: boolean) => void) => void;
   isBlocked: () => boolean;
   hasPermission: (permission: Permission) => boolean;
+  guestSettings: {
+    language: string;
+    theme: 'light' | 'dark' | 'system';
+  };
+  setGuestSettings: (settings: Partial<AuthStore['guestSettings']>) => void;
   refreshSessionFromStores: () => void;
 }
 
@@ -43,6 +48,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     attempts: 0,
     blockedUntil: null,
   },
+  guestSettings: {
+    language: 'English',
+    theme: 'system',
+  },
+
+  setGuestSettings: (settings) =>
+    set((state) => ({
+      guestSettings: { ...state.guestSettings, ...settings },
+    })),
 
   login: (userName, password, getUserByName, setOnline, logEvent) => {
     const state = get();
@@ -131,8 +145,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     });
 
     const currentUser = useUserStore.getState().getUser(user.id) ?? user;
+    
+    // Parse guest settings to main application
+    useUserStore.getState().updateUser(user.id, { 
+      language: get().guestSettings.language as any, 
+      theme: get().guestSettings.theme as any 
+    });
+
     set({
-      session: { user: currentUser, permissions, isAuthenticated: true },
+      session: { 
+        user: useUserStore.getState().getUser(user.id) ?? currentUser, 
+        permissions, 
+        isAuthenticated: true 
+      },
       loginTracker: { attempts: 0, blockedUntil: null },
     });
 

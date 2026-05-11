@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
 import { StaffDataSource } from '@/types/database';
 import { useStaffStore } from '@/stores/staff-store';
+import { useTranslation } from '@/lib/i18n';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
+  const { t } = useTranslation();
   const { staffs } = useStaffStore();
   const allStaff = ds.park === 'ALL'
     ? staffs.filter((staff) => staff.is_enable)
@@ -24,10 +26,10 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
 
   const payrollData = useMemo(
     () => Array.from({ length: 7 }).map((_, i) => ({
-      name: `Month ${i + 1}`,
+      name: `${t('month')} ${i + 1}`,
       payroll: Math.floor(totalPayment * (0.9 + Math.random() * 0.3)),
     })),
-    [totalPayment]
+    [totalPayment, t]
   );
 
   if (ds.type === 'curr_staff_max_staff') {
@@ -37,7 +39,7 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
           {currStaff} <span className="text-xl text-ip-text-secondary">/ {maxStaff}</span>
         </div>
         <div className="text-xs text-ip-text-muted mt-1 uppercase tracking-wider">
-          Staff On Shift · {ds.park === 'ALL' ? 'All Parks' : `Park #${ds.park}`}
+          {t('staff_on_shift')} · {ds.park === 'ALL' ? t('all_parks') : `${t('park')} #${ds.park}`}
         </div>
       </div>
     );
@@ -47,15 +49,15 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
     return (
       <div className="flex justify-between items-center w-full px-2">
         <div className="text-center">
-          <p className="text-[10px] text-ip-text-muted uppercase">Min</p>
+          <p className="text-[10px] text-ip-text-muted uppercase">{t('min')}</p>
           <p className="text-lg font-semibold text-ip-text-secondary">{Math.max(0, currStaff - 2)}</p>
         </div>
         <div className="text-center border-x border-ip-border px-4">
-          <p className="text-[10px] text-ip-text-muted uppercase">Avg</p>
+          <p className="text-[10px] text-ip-text-muted uppercase">{t('average')}</p>
           <p className="text-xl font-bold text-ip-primary">{currStaff}</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-ip-text-muted uppercase">Max</p>
+          <p className="text-[10px] text-ip-text-muted uppercase">{t('max')}</p>
           <p className="text-lg font-semibold text-ip-text-secondary">{maxStaff}</p>
         </div>
       </div>
@@ -80,12 +82,12 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
   if (ds.type === 'estimate_payment') {
     return (
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="text-xl text-ip-text-secondary">Est. Payroll</div>
+        <div className="text-xl text-ip-text-secondary">{t('est_payroll')}</div>
         <div className="text-4xl font-black text-ip-warning mt-2 drop-shadow-sm">
           {totalPayment.toLocaleString()} <span className="text-xl text-ip-text-secondary">VND</span>
         </div>
         <div className="text-[10px] bg-ip-warning/10 text-ip-warning px-2 py-1 rounded-full mt-2">
-          Per {ds.interval} · {maxStaff} active staff
+          {t('per')} {t(ds.interval as any)} · {t('active_staff_count').replace('{count}', String(maxStaff))}
         </div>
       </div>
     );
@@ -105,7 +107,7 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
             />
             <Tooltip
               contentStyle={{ background: 'var(--ip-card)', border: '1px solid var(--ip-border)', borderRadius: '8px' }}
-              formatter={(value: any) => [`${value.toLocaleString()} VND`, 'Payroll']}
+              formatter={(value: any) => [`${value.toLocaleString()} VND`, t('payroll')]}
             />
             <Line type="monotone" dataKey="payroll" stroke="var(--ip-warning)" strokeWidth={3} dot={{ r: 4, fill: 'var(--ip-card)', strokeWidth: 2 }} activeDot={{ r: 6 }} />
           </LineChart>
@@ -114,5 +116,5 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
     );
   }
 
-  return <div className="text-xs text-ip-text-muted text-center">Unknown Staff Widget</div>;
+  return <div className="text-xs text-ip-text-muted text-center">{t('unknown_widget')}</div>;
 }

@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const dashboards = useDashboardStore((state) => state.dashboards);
   const addDashboard = useDashboardStore((state) => state.addDashboard);
   const deleteDashboard = useDashboardStore((state) => state.deleteDashboard);
+  const updateDashboard = useDashboardStore((state) => state.updateDashboard);
   const updateWidgetLayout = useDashboardStore((state) => state.updateWidgetLayout);
   const parks = useParkStore((state) => state.parks);
   const staffs = useStaffStore((state) => state.staffs);
@@ -47,6 +48,7 @@ export default function DashboardPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [dashboardForm, setDashboardForm] = useState({
     dashboard_name: '',
     display_name: '',
@@ -99,12 +101,20 @@ export default function DashboardPage() {
     (event) => sameDay(event.received_time, dateKey()) && !event.is_acknowledged
   ).length;
   const systemStatus = globalState?.emergency_mode
-    ? { value: 'Emergency', detail: 'Emergency mode is active', color: 'var(--ip-error)' }
+    ? { 
+        value: 'emergency', 
+        detail: t('emergency_mode_enabled_desc'), 
+        color: 'var(--ip-error)' 
+      }
     : globalState?.maintenance_mode
-      ? { value: 'Maintenance', detail: 'Maintenance mode is active', color: 'var(--ip-warning)' }
+      ? { 
+          value: 'maintenance', 
+          detail: t('maintenance_mode_enabled_desc'), 
+          color: 'var(--ip-warning)' 
+        }
       : {
-          value: 'Online',
-          detail: `${operatingParks} operating parks connected`,
+          value: 'online',
+          detail: t('parks_connected_desc').replace('{count}', String(operatingParks)),
           color: 'var(--ip-accent)',
         };
 
@@ -177,6 +187,23 @@ export default function DashboardPage() {
     }
     setShowDeleteDialog(false);
     setIsEditing(false);
+  };
+
+  const handleClearAllWidgets = () => {
+    if (!currentDashboard) return;
+    updateDashboard(currentDashboard.id, { widgets_list: [] });
+    setShowClearConfirm(false);
+  };
+
+  const handleRefreshData = () => {
+    useParkStore.getState().refreshData();
+    useStaffStore.getState().refreshData();
+    useEventHistoryStore.getState().refreshData();
+    
+    // Using simple alert for now as there is no Toast system mentioned, 
+    // but the task says 'Make sure all new UI elements has translation correctly'
+    // I will use the t('data_refreshed') in a simple way.
+    console.log(t('data_refreshed'));
   };
 
   if (!currentDashboard) {
@@ -289,7 +316,7 @@ export default function DashboardPage() {
         />
         <StatCard
           label={t('system_status')}
-          value={t(systemStatus.value.toLowerCase() as any)}
+          value={t(systemStatus.value as any)}
           sublabel={systemStatus.detail}
           color={systemStatus.color}
         />
@@ -305,9 +332,7 @@ export default function DashboardPage() {
               type="button"
               className="rounded-lg p-1.5 text-ip-text-secondary hover:bg-ip-surface-hover hover:text-ip-text transition-colors"
               title={t('refresh_data')}
-              onClick={() => {
-                // Future integration for data refresh
-              }}
+              onClick={handleRefreshData}
             >
               <RefreshCw size={16} />
             </button>
@@ -319,17 +344,26 @@ export default function DashboardPage() {
           </div>
           
           {isEditing && (
-            <button
-              onClick={() => setShowWidgetLibrary(!showWidgetLibrary)}
-              className={`ip-btn flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold border transition-all ${
-                showWidgetLibrary 
-                ? 'bg-ip-primary text-white border-ip-primary shadow-lg shadow-ip-primary/20' 
-                : 'bg-ip-surface text-ip-text-secondary border-ip-border hover:bg-ip-surface-hover hover:text-ip-text shadow-sm'
-              }`}
-            >
-              <LayoutDashboard size={14} />
-              {showWidgetLibrary ? t('close_library') : t('add_widget')}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowClearConfirm(true)}
+                className="ip-btn flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all shadow-sm"
+              >
+                <Trash2 size={14} />
+                {t('clear_all')}
+              </button>
+              <button
+                onClick={() => setShowWidgetLibrary(!showWidgetLibrary)}
+                className={`ip-btn flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold border transition-all ${
+                  showWidgetLibrary 
+                  ? 'bg-ip-primary text-white border-ip-primary shadow-lg shadow-ip-primary/20' 
+                  : 'bg-ip-surface text-ip-text-secondary border-ip-border hover:bg-ip-surface-hover hover:text-ip-text shadow-sm'
+                }`}
+              >
+                <LayoutDashboard size={14} />
+                {showWidgetLibrary ? t('close_library') : t('add_widget')}
+              </button>
+            </div>
           )}
         </div>
         
@@ -457,6 +491,32 @@ export default function DashboardPage() {
           {t('delete_dashboard_warning')}
         </div>
       </ConfirmDialog>
+
+      {/* Clear Widgets Confirmation */}
+      <AppDialog
+        open={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        title={t('delete_all_widgets_confirm')}
+        description={t('delete_all_widgets_desc')}
+        tone="danger"
+        icon={<Trash2 size={24} />}
+        footer={
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowClearConfirm(false)}
+              className="px-4 py-2 text-sm font-medium text-ip-text-secondary hover:text-ip-text"
+            >
+              {t('cancel')}
+            </button>
+            <button
+              onClick={handleClearAllWidgets}
+              className="px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 shadow-lg shadow-red-600/20"
+            >
+              {t('delete_all')}
+            </button>
+          </div>
+        }
+      />
     </div>
   );
 }

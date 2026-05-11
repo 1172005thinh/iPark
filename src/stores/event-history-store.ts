@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import type { EventHistory } from '@/types/database';
+import { useParkStore } from '@/stores/park-store';
 
 const now = () => {
   const d = new Date();
@@ -14,8 +15,10 @@ interface EventHistoryStore {
   addEvent: (event: Omit<EventHistory, 'id' | 'received_time'>) => void;
   acknowledgeEvent: (id: number) => void;
   deleteEvent: (id: number) => void;
+  bulkAcknowledgeEvents: (ids: number[]) => void;
   getEventsByPark: (parkId: number) => EventHistory[];
   getEventsByType: (type: string) => EventHistory[];
+  refreshData: () => void;
 }
 
 const initialEvents: EventHistory[] = [
@@ -825,11 +828,63 @@ export const useEventHistoryStore = create<EventHistoryStore>((set, get) => ({
   deleteEvent: (id) =>
     set((state) => ({ events: state.events.filter((e) => e.id !== id) })),
 
-  getEventsByPark: (parkId) =>
-    get().events.filter((e) => e.at_park_id === parkId),
+  bulkAcknowledgeEvents: (ids) =>
+    set((state) => ({
+      events: state.events.map((e) =>
+        ids.includes(e.id) ? { ...e, is_acknowledged: true } : e
+      ),
+    })),
+
+  getEventsByPark: (parkId) => get().events.filter((event) => event.at_park_id === parkId),
 
   getEventsByType: (type) =>
     type === 'all'
       ? get().events
       : get().events.filter((e) => e.event_type === type),
+
+  refreshData: () => {
+    const parks = useParkStore.getState().parks.filter(p => p.is_enable);
+    if (parks.length === 0) return;
+
+    const templates = [
+      { code: '020', name: 'Client Enter Park', type: 'info', desc: 'A client has entered the park' },
+      { code: '021', name: 'Client Exit Park', type: 'info', desc: 'A client has exited the park' },
+      { code: '005', name: 'Login Failed', type: 'warning', desc: 'A user login attempt has failed' },
+      { code: '007', name: 'User Logged In', type: 'info', desc: 'A user has logged in successfully' },
+      { code: '008', name: 'Park Nearly Full', type: 'warning', desc: 'The park is nearly full (>90% capacity)' },
+      { code: '010', name: 'Staff Enter Shift', type: 'info', desc: 'A staff member has entered the working shift' },
+      { code: '011', name: 'Staff Leave Shift', type: 'info', desc: 'A staff member has left the working shift' },
+      { code: '012', name: 'System Execution Failed', type: 'error', desc: 'System execution failure' },
+      { code: '001', name: 'System Startup', type: 'info', desc: 'The system has started successfully' },
+      { code: '003', name: 'System Shutdown', type: 'info', desc: 'The system has shut down successfully' },
+    ];
+
+    const count = Math.floor(Math.random() * 11) + 15; // 15-25
+    const timestamp = now();
+    const currentEvents = [...get().events];
+    let lastId = currentEvents.length > 0 ? Math.max(...currentEvents.map(e => e.id)) : 0;
+
+    const newEvents: EventHistory[] = [];
+    for (let i = 0; i < count; i++) {
+      const t = templates[Math.floor(Math.random() * templates.length)];
+      const p = parks[Math.floor(Math.random() * parks.length)];
+      
+      newEvents.push({
+        id: ++lastId,
+        event_code: t.code,
+        event_name: t.name,
+        event_type: t.type as any,
+        error_code: t.type === 'error' ? '0x0003' : '0x0000',
+        description: t.desc,
+        at_park_id: p.id,
+        extra_info: `Simulated event for ${p.display_name}`,
+        sent_time: timestamp,
+        received_time: timestamp,
+        is_acknowledged: Math.random() > 0.8,
+      });
+    }
+
+    const merged = [...newEvents, ...currentEvents].slice(0, 1000);
+    set({ events: merged });
+  },
 }));

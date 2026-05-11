@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useId, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export type DialogTone = 'default' | 'info' | 'success' | 'warning' | 'danger';
@@ -51,6 +52,11 @@ export function AppDialog({
 }: AppDialogProps) {
   const titleId = useId();
   const descriptionId = useId();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -79,12 +85,12 @@ export function AppDialog({
     };
   }, [dismissible, onClose, open]);
 
-  if (!open) {
+  if (!open || !mounted) {
     return null;
   }
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
       <div
         className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
         onClick={dismissible ? onClose : undefined}
@@ -154,6 +160,7 @@ export function AppDialog({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

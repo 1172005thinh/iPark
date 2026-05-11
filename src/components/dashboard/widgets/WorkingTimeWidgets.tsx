@@ -2,9 +2,11 @@ import React, { useMemo } from 'react';
 import { WorkingTimeDataSource } from '@/types/database';
 import { parseTimeToMinutes } from '@/lib/ipark-utils';
 import { useParkStore } from '@/stores/park-store';
+import { useTranslation } from '@/lib/i18n';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
+  const { t } = useTranslation();
   const { parks } = useParkStore();
   const enabledParks = parks.filter((park) => park.is_enable);
   const park = ds.park !== 'ALL'
@@ -27,22 +29,22 @@ export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
   if (ds.type === 'start_end_time') {
     const startTime = park?.start_time?.slice(0, 5) ?? '06:00';
     const endTime = park?.end_time?.slice(0, 5) ?? '18:00';
-    const parkName = park?.display_name ?? 'All Parks';
+    const parkName = park?.display_name ?? t('all_parks');
     return (
       <div className="flex flex-col w-full">
-        <p className="text-[10px] text-ip-text-muted text-center uppercase mb-2">{parkName} · Working Hours</p>
+        <p className="text-[10px] text-ip-text-muted text-center uppercase mb-2">{parkName} · {t('working_hours')}</p>
         <div className="flex justify-between items-center w-full px-4 py-2">
           <div className="flex flex-col items-center">
-            <span className="text-xs text-ip-text-muted uppercase mb-1">Opens</span>
+            <span className="text-xs text-ip-text-muted uppercase mb-1">{t('opens')}</span>
             <span className="text-2xl font-bold text-ip-success">{startTime}</span>
           </div>
           <div className="h-px bg-ip-border flex-grow mx-4 relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-ip-text-muted bg-ip-card px-2 text-xs">
-              to
+              {t('to')}
             </div>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-xs text-ip-text-muted uppercase mb-1">Closes</span>
+            <span className="text-xs text-ip-text-muted uppercase mb-1">{t('closes')}</span>
             <span className="text-2xl font-bold text-ip-error">{endTime}</span>
           </div>
         </div>
@@ -61,7 +63,7 @@ export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
           {totalHours} <span className="text-xl text-ip-text-secondary">{ds.unit}</span>
         </div>
         <div className="text-xs text-ip-text-muted mt-1 uppercase tracking-wider">
-          {park?.display_name ?? 'Park'} Working Shift
+          {park?.display_name ?? t('park')} {t('working_shift')}
         </div>
       </div>
     );
@@ -79,15 +81,15 @@ export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
     return (
       <div className="flex justify-between items-center w-full px-2">
         <div className="text-center">
-          <p className="text-[10px] text-ip-text-muted uppercase">Lowest</p>
+          <p className="text-[10px] text-ip-text-muted uppercase">{t('lowest')}</p>
           <p className="text-lg font-semibold text-ip-text-secondary">{lowest} {ds.unit}</p>
         </div>
         <div className="text-center border-x border-ip-border px-4">
-          <p className="text-[10px] text-ip-text-muted uppercase">Average</p>
+          <p className="text-[10px] text-ip-text-muted uppercase">{t('average')}</p>
           <p className="text-xl font-bold text-ip-primary">{average} {ds.unit}</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-ip-text-muted uppercase">Highest</p>
+          <p className="text-[10px] text-ip-text-muted uppercase">{t('highest')}</p>
           <p className="text-lg font-semibold text-ip-text-secondary">{highest} {ds.unit}</p>
         </div>
       </div>
@@ -103,7 +105,7 @@ export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
             <YAxis fontSize={10} stroke="var(--ip-text-muted)" />
             <Tooltip
               contentStyle={{ background: 'var(--ip-card)', border: '1px solid var(--ip-border)' }}
-              formatter={(value: any) => [`${value} ${ds.unit}`, 'Working Time']}
+              formatter={(value: any) => [`${value} ${ds.unit}`, t('working_time')]}
             />
             <Line type="monotone" dataKey="time" stroke="var(--ip-primary)" strokeWidth={2} dot={{ r: 3 }} />
           </LineChart>
@@ -112,5 +114,5 @@ export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
     );
   }
 
-  return <div className="text-xs text-ip-text-muted text-center">Unknown Working Time Widget</div>;
+  return <div className="text-xs text-ip-text-muted text-center">{t('unknown_widget')}</div>;
 }

@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
 import { ParkDataSource } from '@/types/database';
 import { useParkStore } from '@/stores/park-store';
+import { useTranslation } from '@/lib/i18n';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function ParkWidgets({ ds }: { ds: ParkDataSource }) {
+  const { t } = useTranslation();
   const { parks: allParks } = useParkStore();
   const parks = ds.park === 'ALL'
     ? allParks.filter((park) => park.is_enable)
@@ -25,7 +27,7 @@ export function ParkWidgets({ ds }: { ds: ParkDataSource }) {
   );
 
   if (ds.type === 'curr_slot_max_slot') {
-    if (totalMaxSlot === 0) return <div className="text-xs text-ip-text-muted text-center">No park data</div>;
+    if (totalMaxSlot === 0) return <div className="text-xs text-ip-text-muted text-center">{t('no_park_data')}</div>;
     return (
       <div className="flex flex-col items-center justify-center text-center">
         <div className="text-3xl font-bold text-ip-primary">
@@ -33,7 +35,7 @@ export function ParkWidgets({ ds }: { ds: ParkDataSource }) {
           <span className="text-xl text-ip-text-secondary"> / {totalMaxSlot}</span>
         </div>
         <div className="text-xs text-ip-text-muted mt-1 uppercase tracking-wider">
-          {ds.unit}s used {ds.park !== 'ALL' && parks[0] ? `· ${parks[0].display_name}` : '· All Parks'}
+          {ds.unit}s {t('used')} {ds.park !== 'ALL' && parks[0] ? `· ${parks[0].display_name}` : `· ${t('all_parks')}`}
         </div>
       </div>
     );
@@ -45,18 +47,18 @@ export function ParkWidgets({ ds }: { ds: ParkDataSource }) {
     const highest = Math.floor(totalMaxSlot * 0.9);
     return (
       <div className="flex flex-col items-center w-full">
-        <p className="text-[10px] text-ip-text-muted uppercase mb-2">Slot Stats · per {ds.interval}</p>
+        <p className="text-[10px] text-ip-text-muted uppercase mb-2">{t('slot_stats')} · {t('per')} {t(ds.interval as any)}</p>
         <div className="flex justify-between items-center w-full px-2">
           <div className="text-center">
-            <p className="text-[10px] text-ip-text-muted uppercase">Lowest</p>
+            <p className="text-[10px] text-ip-text-muted uppercase">{t('lowest')}</p>
             <p className="text-lg font-semibold text-ip-success">{lowest}</p>
           </div>
           <div className="text-center border-x border-ip-border px-4">
-            <p className="text-[10px] text-ip-text-muted uppercase">Average</p>
+            <p className="text-[10px] text-ip-text-muted uppercase">{t('average')}</p>
             <p className="text-xl font-bold text-ip-primary">{avg}</p>
           </div>
           <div className="text-center">
-            <p className="text-[10px] text-ip-text-muted uppercase">Highest</p>
+            <p className="text-[10px] text-ip-text-muted uppercase">{t('highest')}</p>
             <p className="text-lg font-semibold text-ip-error">{highest}</p>
           </div>
         </div>
@@ -73,7 +75,7 @@ export function ParkWidgets({ ds }: { ds: ParkDataSource }) {
             <YAxis fontSize={10} stroke="var(--ip-text-muted)" domain={[0, totalMaxSlot]} />
             <Tooltip
               contentStyle={{ background: 'var(--ip-card)', border: '1px solid var(--ip-border)' }}
-              formatter={(value: any) => [`${value} ${ds.unit}`, 'Slots']}
+              formatter={(value: any) => [`${value} ${ds.unit}`, t('slots')]}
             />
             <Line type="monotone" dataKey="val" stroke="var(--ip-primary)" strokeWidth={2} dot={{ r: 3 }} />
           </LineChart>
@@ -82,5 +84,5 @@ export function ParkWidgets({ ds }: { ds: ParkDataSource }) {
     );
   }
 
-  return <div className="text-xs text-ip-text-muted text-center">Unknown Park Widget</div>;
+  return <div className="text-xs text-ip-text-muted text-center">{t('unknown_widget')}</div>;
 }

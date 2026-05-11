@@ -26,7 +26,8 @@ export function EventWidgets({ ds }: { ds: EventDataSource }) {
           latestEvent.event_type === 'warning' ? 'bg-ip-warning/10 text-ip-warning' :
           'bg-ip-success/10 text-ip-success'
         }`}>
-          {latestEvent.event_type.toUpperCase()}
+          {latestEvent.event_type === 'error' ? t('error_lc') : 
+           latestEvent.event_type === 'warning' ? t('warning_lc') : t('info_lc')}
         </div>
         <div className="text-base font-semibold text-ip-text truncate w-full">
           {latestEvent.event_name}
@@ -77,20 +78,20 @@ export function EventWidgets({ ds }: { ds: EventDataSource }) {
     return (
       <div className="flex justify-between items-center w-full px-2 h-full">
         <div className="flex flex-col items-center">
-          <span className="text-[10px] text-ip-error uppercase mb-1">Error</span>
+          <span className="text-[10px] text-ip-error uppercase mb-1">{t('error_lc')}</span>
           <span className="text-2xl font-bold text-ip-error">{errorCount}</span>
         </div>
         <div className="flex flex-col items-center border-x border-ip-border px-4">
-          <span className="text-[10px] text-ip-warning uppercase mb-1">Warning</span>
+          <span className="text-[10px] text-ip-warning uppercase mb-1">{t('warning_lc')}</span>
           <span className="text-2xl font-bold text-ip-warning">{warningCount}</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-[10px] text-ip-success uppercase mb-1">Info</span>
+          <span className="text-[10px] text-ip-success uppercase mb-1">{t('info_lc')}</span>
           <span className="text-2xl font-bold text-ip-success">{infoCount}</span>
         </div>
       </div>
     );
   }
 
-  return <div>Unknown Event Widget</div>;
+  return <div className="text-xs text-ip-text-muted text-center">Unknown Event Widget</div>;
 }

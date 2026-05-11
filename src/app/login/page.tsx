@@ -11,7 +11,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isBlocked, session, loginTracker } = useAuthStore();
+  const { login, isBlocked, session, loginTracker, guestSettings, setGuestSettings } = useAuthStore();
   const { getUserByName, setOnline } = useUserStore();
   const { addEvent } = useEventHistoryStore();
   const { t } = useTranslation();
@@ -25,6 +25,21 @@ export default function LoginPage() {
   const [forgotMessage, setForgotMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
+
+  // Apply guest theme
+  useEffect(() => {
+    const root = window.document.documentElement;
+    const theme = guestSettings.theme;
+    
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.remove('light', 'dark');
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.remove('light', 'dark');
+      root.classList.add(theme);
+    }
+  }, [guestSettings.theme]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -86,7 +101,7 @@ export default function LoginPage() {
   const attemptsLeft = 5 - loginTracker.attempts;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-ip-bg p-4">
+    <div className="min-h-screen flex items-center justify-center bg-ip-bg p-4 relative overflow-hidden">
       {/* Background Decorative Curves */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
@@ -99,167 +114,209 @@ export default function LoginPage() {
         />
       </div>
 
-      <div className="ip-card p-8 sm:p-10 w-full max-w-md relative ip-fade-in">
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-lg bg-ip-primary/10 flex items-center justify-center">
-            <NextImage 
-              src="/logo.ico" 
-              alt="iPark Logo" 
-              fill 
-              sizes="(max-width: 768px) 48px, 48px"
-              priority
-              className="object-contain p-2"
-            />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-ip-text tracking-tight">
-              iPark
-            </h1>
-            <p className="text-xs text-ip-text-muted">
-              {t('login_title')}
-            </p>
-          </div>
-        </div>
-
-        {/* Login Form */}
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label
-              htmlFor="login-username"
-              className="block text-sm font-medium text-ip-text-secondary mb-1.5"
-            >
-              {t('username')}
-            </label>
-            <input
-              id="login-username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="ip-input"
-              placeholder={t('username')}
-              required
-              disabled={blocked || isLoading}
-              autoComplete="username"
-              autoFocus
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="login-password"
-              className="block text-sm font-medium text-ip-text-secondary mb-1.5"
-            >
-              {t('password')}
-            </label>
-            <div className="relative">
-              <input
-                id="login-password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="ip-input pr-10"
-                placeholder={t('password')}
-                required
-                disabled={blocked || isLoading}
-                autoComplete="current-password"
+      <div className="w-full max-w-md flex flex-col gap-8 items-center relative z-10 ip-fade-in">
+        <div className="ip-card p-8 sm:p-10 w-full relative shadow-2xl shadow-slate-900/10">
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-lg bg-ip-primary/10 flex items-center justify-center">
+              <NextImage 
+                src="/logo.ico" 
+                alt="iPark Logo" 
+                fill 
+                sizes="(max-width: 768px) 48px, 48px"
+                priority
+                className="object-contain p-2"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-ip-text-muted hover:text-ip-primary transition-colors"
-                title={showPassword ? t('view') : t('edit')}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
             </div>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm ip-fade-in">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="flex-shrink-0 mt-0.5"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-              </svg>
-              <div>
-                <p>{error}</p>
-                {!blocked && loginTracker.attempts > 0 && (
-                  <p className="text-xs mt-1 text-red-500">
-                    {t('attempts_remaining').replace('{count}', attemptsLeft.toString())}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Blocked Timer */}
-          {blocked && remainingTime > 0 && (
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm ip-fade-in">
-              <p className="font-medium">{t('account_locked')}</p>
-              <p className="text-xs mt-1">
-                {t('try_again_in').replace('{count}', Math.ceil(remainingTime / 1000).toString())}
+            <div>
+              <h1 className="text-2xl font-bold text-ip-text tracking-tight">
+                iPark
+              </h1>
+              <p className="text-xs text-ip-text-muted">
+                {t('login_title')}
               </p>
             </div>
-          )}
+          </div>
 
-          <button
-            type="submit"
-            disabled={blocked || isLoading}
-            className="ip-btn ip-btn-primary w-full py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {t('loading')}
-              </>
-            ) : (
-              t('sign_in')
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label
+                htmlFor="login-username"
+                className="block text-sm font-medium text-ip-text-secondary mb-1.5"
+              >
+                {t('username')}
+              </label>
+              <input
+                id="login-username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="ip-input"
+                placeholder={t('username')}
+                required
+                disabled={blocked || isLoading}
+                autoComplete="username"
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="login-password"
+                className="block text-sm font-medium text-ip-text-secondary mb-1.5"
+              >
+                {t('password')}
+              </label>
+              <div className="relative">
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="ip-input pr-10"
+                  placeholder={t('password')}
+                  required
+                  disabled={blocked || isLoading}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-ip-text-muted hover:text-ip-primary transition-colors"
+                  title={showPassword ? t('view') : t('edit')}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm ip-fade-in">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="flex-shrink-0 mt-0.5"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="15" y1="9" x2="9" y2="15" />
+                  <line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
+                <div>
+                  <p>{error}</p>
+                  {!blocked && loginTracker.attempts > 0 && (
+                    <p className="text-xs mt-1 text-red-500">
+                      {t('attempts_remaining').replace('{count}', attemptsLeft.toString())}
+                    </p>
+                  )}
+                </div>
+              </div>
             )}
-          </button>
-        </form>
 
-        {/* Forgot Password */}
-        <div className="mt-5 text-center">
-          <button
-            onClick={() => {
-              setShowForgotDialog(true);
-              setForgotMessage('');
-              setForgotEmail('');
-            }}
-            className="text-sm text-ip-primary hover:text-ip-primary-dark transition-colors"
-          >
-            {t('forgot_password')}
-          </button>
+            {/* Blocked Timer */}
+            {blocked && remainingTime > 0 && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm ip-fade-in">
+                <p className="font-medium">{t('account_locked')}</p>
+                <p className="text-xs mt-1">
+                  {t('try_again_in').replace('{count}', Math.ceil(remainingTime / 1000).toString())}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={blocked || isLoading}
+              className="ip-btn ip-btn-primary w-full py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {t('loading')}
+                </>
+              ) : (
+                t('sign_in')
+              )}
+            </button>
+          </form>
+
+          {/* Forgot Password */}
+          <div className="mt-5 text-center">
+            <button
+              onClick={() => {
+                setShowForgotDialog(true);
+                setForgotMessage('');
+                setForgotEmail('');
+              }}
+              className="text-sm text-ip-primary hover:text-ip-primary-dark transition-colors"
+            >
+              {t('forgot_password')}
+            </button>
+          </div>
+
+          {/* Demo Credentials Hint */}
+          <div className="mt-6 p-3 rounded-xl bg-ip-bg border border-ip-border">
+            <p className="text-xs text-ip-text-muted text-center font-medium mb-1">
+              {t('demo_credentials')}
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs text-ip-text-secondary">
+              <div>
+                <span className="text-ip-text-muted">{t('admin')}:</span> admin
+              </div>
+              <div>
+                <span className="text-ip-text-muted">{t('password')}:</span> Admin@123
+              </div>
+              <div>
+                <span className="text-ip-text-muted">{t('user')}:</span> user1
+              </div>
+              <div>
+                <span className="text-ip-text-muted">{t('password')}:</span> User1@123
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Demo Credentials Hint */}
-        <div className="mt-6 p-3 rounded-xl bg-ip-bg border border-ip-border">
-          <p className="text-xs text-ip-text-muted text-center font-medium mb-1">
-            {t('demo_credentials')}
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs text-ip-text-secondary">
-            <div>
-              <span className="text-ip-text-muted">{t('admin')}:</span> admin
-            </div>
-            <div>
-              <span className="text-ip-text-muted">{t('password')}:</span> Admin@123
-            </div>
-            <div>
-              <span className="text-ip-text-muted">{t('user')}:</span> user1
-            </div>
-            <div>
-              <span className="text-ip-text-muted">{t('password')}:</span> User1@123
-            </div>
+        {/* Language & Theme Switches Outside */}
+        <div className="flex items-center gap-6">
+          {/* Language Switch */}
+          <div className="flex p-1 bg-ip-surface rounded-full border border-ip-border shadow-sm">
+            {[
+              { id: 'English', label: 'EN' },
+              { id: 'Vietnamese', label: 'VI' },
+            ].map((lang) => (
+              <button
+                key={lang.id}
+                onClick={() => setGuestSettings({ language: lang.id })}
+                className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${
+                  guestSettings.language === lang.id
+                    ? 'bg-ip-primary text-white shadow-md'
+                    : 'text-ip-text-muted hover:text-ip-text'
+                }`}
+              >
+                {lang.label}
+              </button>
+            ))}
+          </div>
+          
+          {/* Theme Switch */}
+          <div className="flex p-1 bg-ip-surface rounded-full border border-ip-border shadow-sm">
+            {(['light', 'dark', 'system'] as const).map((tId) => (
+              <button
+                key={tId}
+                onClick={() => setGuestSettings({ theme: tId })}
+                className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all capitalize ${
+                  guestSettings.theme === tId
+                    ? 'bg-ip-primary text-white shadow-md'
+                    : 'text-ip-text-muted hover:text-ip-text'
+                }`}
+              >
+                {t(tId)}
+              </button>
+            ))}
           </div>
         </div>
       </div>

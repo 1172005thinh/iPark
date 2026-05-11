@@ -82,7 +82,7 @@ export const DASHBOARD_DB: Dashboard[] = [
       {
         id: 'w5',
         label: 'Recent Events',
-        description: '5 Latest events',
+        description: '10 Latest events',
         position_x: 4,
         position_y: 2,
         width: 2,
@@ -307,7 +307,7 @@ export const DASHBOARD_DB: Dashboard[] = [
       {
         id: 'w5',
         label: 'Recent Events',
-        description: '5 Latest events',
+        description: '10 Latest events',
         position_x: 4,
         position_y: 2,
         width: 2,

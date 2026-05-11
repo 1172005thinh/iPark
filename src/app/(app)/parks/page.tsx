@@ -170,7 +170,7 @@ export default function ParksPage() {
       const result = updatePark(formDialog.parkId, nextParkData);
 
       if (!result.ok) {
-        setFormError(result.error || 'Unable to save park changes.');
+        setFormError(result.error || t('error_saving_changes'));
         return;
       }
 
@@ -179,7 +179,7 @@ export default function ParksPage() {
       const result = addPark(nextParkData);
 
       if (!result.ok) {
-        setFormError(result.error || 'Unable to create park.');
+        setFormError(result.error || t('error_creating_entry'));
         return;
       }
     }
@@ -193,7 +193,7 @@ export default function ParksPage() {
     const result = deletePark(parkToDelete.id);
 
     if (!result.ok) {
-      setDeleteError(result.error || 'Unable to delete this park.');
+      setDeleteError(result.error || t('error_deleting_entry'));
       return;
     }
 
@@ -324,10 +324,10 @@ export default function ParksPage() {
                     </td>
                     <td className="px-5 py-4">{park.max_slot}</td>
                     <td className="px-5 py-4">
-                      <StatusBadge active={park.is_enable} />
+                      <StatusBadge active={park.is_enable} t={t} />
                     </td>
                     <td className="px-5 py-4">
-                      <StatusBadge active={park.is_operating} />
+                      <StatusBadge active={park.is_operating} t={t} />
                     </td>
                     {showActions ? (
                       <td className="px-5 py-4 text-right">
@@ -339,7 +339,7 @@ export default function ParksPage() {
                               className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-text-secondary hover:bg-ip-bg hover:text-ip-text"
                             >
                               <Eye size={14} />
-                              View
+                              {t('view')}
                             </button>
                           ) : null}
                           {hasEdit ? (
@@ -350,7 +350,7 @@ export default function ParksPage() {
                               className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-primary hover:bg-ip-primary/10 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                             >
                               <PencilLine size={14} />
-                              Edit
+                              {t('edit')}
                             </button>
                           ) : null}
                           {hasDelete ? (
@@ -364,7 +364,7 @@ export default function ParksPage() {
                               className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                             >
                               <Trash2 size={14} />
-                              Delete
+                              {t('delete')}
                             </button>
                           ) : null}
                         </div>
@@ -378,7 +378,7 @@ export default function ParksPage() {
                     colSpan={showActions ? columns.length + 2 : columns.length + 1}
                     className="px-6 py-14 text-center text-sm text-ip-text-muted"
                   >
-                    No parks available. Add a new park to begin.
+                    {t('no_parks_found')}
                   </td>
                 </tr>
               )}
@@ -398,10 +398,10 @@ export default function ParksPage() {
       <AppDialog
         open={selectedPark !== null}
         onClose={() => setSelectedParkId(null)}
-        title={selectedPark ? selectedPark.display_name : 'Park details'}
+        title={selectedPark ? selectedPark.display_name : t('park_details')}
         description={
           selectedPark
-            ? `Park #${selectedPark.id} profile and operational metadata.`
+            ? t('park_details_desc').replace('{id}', selectedPark.id.toString())
             : undefined
         }
         icon={<Warehouse size={22} />}
@@ -413,7 +413,7 @@ export default function ParksPage() {
               onClick={() => setSelectedParkId(null)}
               className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
             >
-              Close
+              {t('close')}
             </button>
             {hasEdit && selectedPark ? (
               <button
@@ -429,7 +429,7 @@ export default function ParksPage() {
                     : 'bg-ip-primary text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90'
                 }`}
               >
-                {selectedIds.size > 0 ? 'Edit Disabled' : 'Edit Park'}
+                {selectedIds.size > 0 ? t('edit_disabled') : t('edit_park')}
               </button>
             ) : null}
           </div>
@@ -437,36 +437,36 @@ export default function ParksPage() {
       >
         {selectedPark ? (
           <div className="grid gap-4 md:grid-cols-2">
-            <DetailItem label="Park Name" value={selectedPark.park_name} />
-            <DetailItem label="Display Name" value={selectedPark.display_name} />
+            <DetailItem label={t('park_name')} value={selectedPark.park_name} />
+            <DetailItem label={t('display_name')} value={selectedPark.display_name} />
             <DetailItem
-              label="Location"
+              label={t('location')}
               value={selectedPark.location}
               icon={<MapPin size={14} />}
             />
-            <DetailItem label="Description" value={selectedPark.description} />
-            <DetailItem label="Start Time" value={selectedPark.start_time} />
-            <DetailItem label="End Time" value={selectedPark.end_time} />
+            <DetailItem label={t('description')} value={selectedPark.description} />
+            <DetailItem label={t('start_time')} value={selectedPark.start_time} />
+            <DetailItem label={t('end_time')} value={selectedPark.end_time} />
             <DetailItem
-              label="Fee"
+              label={t('fee')}
               value={`${selectedPark.fee.toLocaleString()} VND`}
             />
-            <DetailItem label="Max Slots" value={String(selectedPark.max_slot)} />
+            <DetailItem label={t('max_slots')} value={String(selectedPark.max_slot)} />
             <DetailItem
-              label="Enabled"
-              value={<StatusBadge active={selectedPark.is_enable} />}
+              label={t('enabled')}
+              value={<StatusBadge active={selectedPark.is_enable} t={t} />}
             />
             <DetailItem
-              label="Operating"
-              value={<StatusBadge active={selectedPark.is_operating} />}
+              label={t('operating')}
+              value={<StatusBadge active={selectedPark.is_operating} t={t} />}
             />
-            <DetailItem label="Created At" value={selectedPark.created_at} />
+            <DetailItem label={t('created_at')} value={selectedPark.created_at} />
             <DetailItem
-              label="Last Modified"
+              label={t('last_modified')}
               value={selectedPark.last_modified_at}
             />
             <DetailItem
-              label="Last Active"
+              label={t('last_active')}
               value={selectedPark.last_active}
               className="md:col-span-2"
             />
@@ -477,11 +477,11 @@ export default function ParksPage() {
       <AppDialog
         open={formDialog !== null}
         onClose={closeFormDialog}
-        title={formDialog?.mode === 'edit' ? 'Edit Park' : 'Add Park'}
+        title={formDialog?.mode === 'edit' ? t('edit_park') : t('add_park')}
         description={
           formDialog?.mode === 'edit'
-            ? 'Update park details, status, and operating schedule.'
-            : 'Create a new park entry for this demo session.'
+            ? t('edit_park_desc')
+            : t('add_park_desc')
         }
         icon={
           formDialog?.mode === 'edit' ? (
@@ -498,21 +498,21 @@ export default function ParksPage() {
               onClick={closeFormDialog}
               className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
               form="park-form"
               className="ip-btn rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
             >
-              {formDialog?.mode === 'edit' ? 'Save Changes' : 'Create Park'}
+              {formDialog?.mode === 'edit' ? t('save_changes') : t('create_park')}
             </button>
           </div>
         }
       >
         <form id="park-form" onSubmit={handleSavePark} className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Park Name" htmlFor="park_name" hint="Unique object name using letters, numbers, and underscores.">
+            <FormField label={t('park_name')} htmlFor="park_name" hint={t('park_name_hint')}>
               <input
                 id="park_name"
                 value={formState.park_name}
@@ -521,7 +521,7 @@ export default function ParksPage() {
                 placeholder="central_park"
               />
             </FormField>
-            <FormField label="Display Name" htmlFor="display_name">
+            <FormField label={t('display_name')} htmlFor="display_name">
               <input
                 id="display_name"
                 value={formState.display_name}
@@ -533,7 +533,7 @@ export default function ParksPage() {
               />
             </FormField>
             <FormField
-              label="Location"
+              label={t('location')}
               htmlFor="location"
               className="md:col-span-2"
             >
@@ -546,7 +546,7 @@ export default function ParksPage() {
               />
             </FormField>
             <FormField
-              label="Description"
+              label={t('description')}
               htmlFor="description"
               className="md:col-span-2"
             >
@@ -558,10 +558,10 @@ export default function ParksPage() {
                 }
                 rows={3}
                 className="ip-input min-h-[104px] resize-y"
-                placeholder="Short description for operators and admins"
+                placeholder={t('park_desc_placeholder')}
               />
             </FormField>
-            <FormField label="Start Time" htmlFor="start_time">
+            <FormField label={t('start_time')} htmlFor="start_time">
               <input
                 id="start_time"
                 type="time"
@@ -572,7 +572,7 @@ export default function ParksPage() {
                 className="ip-input"
               />
             </FormField>
-            <FormField label="End Time" htmlFor="end_time">
+            <FormField label={t('end_time')} htmlFor="end_time">
               <input
                 id="end_time"
                 type="time"
@@ -581,7 +581,7 @@ export default function ParksPage() {
                 className="ip-input"
               />
             </FormField>
-            <FormField label="Fee (VND)" htmlFor="fee">
+            <FormField label={t('fee_vnd')} htmlFor="fee">
               <input
                 id="fee"
                 type="number"
@@ -593,7 +593,7 @@ export default function ParksPage() {
                 placeholder="2000"
               />
             </FormField>
-            <FormField label="Max Slots" htmlFor="max_slot">
+            <FormField label={t('max_slots')} htmlFor="max_slot">
               <input
                 id="max_slot"
                 type="number"
@@ -608,14 +608,14 @@ export default function ParksPage() {
 
           <div className="grid gap-3 md:grid-cols-2">
             <FormToggle
-              label="Enabled"
-              description="Disabled parks stay editable, but they cannot remain in operation."
+              label={t('enabled')}
+              description={t('park_enabled_desc')}
               checked={formState.is_enable}
               onChange={(checked) => updateForm('is_enable', checked)}
             />
             <FormToggle
-              label="Operating"
-              description="Operating status automatically turns off when the park is disabled."
+              label={t('operating')}
+              description={t('park_operating_desc')}
               checked={formState.is_operating}
               disabled={!formState.is_enable}
               onChange={(checked) => updateForm('is_operating', checked)}
@@ -637,13 +637,13 @@ export default function ParksPage() {
           setParkToDeleteId(null);
         }}
         onConfirm={handleDeletePark}
-        title={parkToDelete ? `Delete ${parkToDelete.display_name}?` : 'Delete park'}
+        title={parkToDelete ? t('delete_confirm_title').replace('{name}', parkToDelete.display_name) : t('delete_park')}
         description={
           parkToDelete
-            ? `Park #${parkToDelete.id} will be removed from the shared mock database layer for this running session.`
+            ? t('delete_park_desc').replace('{id}', parkToDelete.id.toString())
             : undefined
         }
-        confirmLabel="Delete Park"
+        confirmLabel={t('delete_park')}
         tone="danger"
       >
         {deleteError ? (
@@ -673,7 +673,7 @@ export default function ParksPage() {
   );
 }
 
-function StatusBadge({ active }: { active: boolean }) {
+function StatusBadge({ active, t }: { active: boolean; t: any }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -685,7 +685,7 @@ function StatusBadge({ active }: { active: boolean }) {
           active ? 'bg-green-500' : 'bg-red-400'
         }`}
       />
-      {active ? 'Yes' : 'No'}
+      {active ? t('yes') : t('no')}
     </span>
   );
 }
