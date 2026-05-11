@@ -859,12 +859,28 @@ export const useEventHistoryStore = create<EventHistoryStore>((set, get) => ({
       { code: '003', name: 'System Shutdown', type: 'info', desc: 'The system has shut down successfully' },
     ];
 
-    const count = Math.floor(Math.random() * 11) + 15; // 15-25
+    const count = Math.floor(Math.random() * 5) + 1; // 1-5
     const timestamp = now();
     const currentEvents = [...get().events];
     let lastId = currentEvents.length > 0 ? Math.max(...currentEvents.map(e => e.id)) : 0;
 
     const newEvents: EventHistory[] = [];
+    
+    // Always add a "Data Refreshed" system event to trigger the notification
+    newEvents.push({
+      id: ++lastId,
+      event_code: 'INF',
+      event_name: 'Data Refreshed',
+      event_type: 'info',
+      error_code: '0x0000',
+      description: 'System data has been refreshed successfully.',
+      at_park_id: 1,
+      extra_info: 'Manual Refresh',
+      sent_time: timestamp,
+      received_time: timestamp,
+      is_acknowledged: true,
+    });
+
     for (let i = 0; i < count; i++) {
       const t = templates[Math.floor(Math.random() * templates.length)];
       const p = parks[Math.floor(Math.random() * parks.length)];

@@ -601,7 +601,7 @@ export default function SettingsPage() {
           <div className="grid gap-x-12 gap-y-2 md:grid-cols-2">
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
               <span className="text-sm text-ip-text-secondary">{t('version')}</span>
-              <span className="text-sm font-medium text-ip-text">v1.4.1 (Stable)</span>
+              <span className="text-sm font-medium text-ip-text">v1.5 (Stable)</span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
               <span className="text-sm text-ip-text-secondary">{t('release_type')}</span>
@@ -611,7 +611,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
               <span className="text-sm text-ip-text-secondary">{t('developers')}</span>
-              <span className="text-sm font-medium text-ip-text text-right">TICSMTC - HCMUT 3rd CSE Group</span>
+              <span className="text-sm font-medium text-ip-text text-right">TICSMTC - HCMUT 3rd-year CSE Group</span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
               <span className="text-sm text-ip-text-secondary">{t('source_code')}</span>

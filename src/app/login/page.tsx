@@ -31,13 +31,13 @@ export default function LoginPage() {
     const root = window.document.documentElement;
     const theme = guestSettings.theme;
     
-    if (theme === 'system') {
+    if (theme === 'System') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       root.classList.remove('light', 'dark');
       root.classList.add(systemTheme);
     } else {
       root.classList.remove('light', 'dark');
-      root.classList.add(theme);
+      root.classList.add(theme.toLowerCase());
     }
   }, [guestSettings.theme]);
 
@@ -304,7 +304,7 @@ export default function LoginPage() {
           
           {/* Theme Switch */}
           <div className="flex p-1 bg-ip-surface rounded-full border border-ip-border shadow-sm">
-            {(['light', 'dark', 'system'] as const).map((tId) => (
+            {(['Light', 'Dark', 'System'] as const).map((tId) => (
               <button
                 key={tId}
                 onClick={() => setGuestSettings({ theme: tId })}
@@ -314,7 +314,7 @@ export default function LoginPage() {
                     : 'text-ip-text-muted hover:text-ip-text'
                 }`}
               >
-                {t(tId)}
+                {t(tId.toLowerCase() as any)}
               </button>
             ))}
           </div>

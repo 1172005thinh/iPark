@@ -278,20 +278,6 @@ export default function DashboardPage() {
               {t('delete')}
             </button>
           )}
-
-          {hasEdit && (
-            <button 
-              onClick={() => setIsEditing(!isEditing)}
-              className={`ip-btn flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg transition-colors border ${
-                isEditing 
-                ? 'bg-ip-primary text-white border-ip-primary shadow-ip-primary/20' 
-                : 'bg-ip-surface text-ip-text-secondary border-ip-border hover:bg-ip-surface-hover hover:text-ip-text shadow-slate-900/5'
-              }`}
-            >
-              <PencilLine size={16} />
-              {t('edit')}
-            </button>
-          )}
         </div>
       </div>
 
@@ -343,28 +329,43 @@ export default function DashboardPage() {
             )}
           </div>
           
-          {isEditing && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowClearConfirm(true)}
-                className="ip-btn flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all shadow-sm"
-              >
-                <Trash2 size={14} />
-                {t('clear_all')}
-              </button>
-              <button
-                onClick={() => setShowWidgetLibrary(!showWidgetLibrary)}
-                className={`ip-btn flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold border transition-all ${
-                  showWidgetLibrary 
-                  ? 'bg-ip-primary text-white border-ip-primary shadow-lg shadow-ip-primary/20' 
-                  : 'bg-ip-surface text-ip-text-secondary border-ip-border hover:bg-ip-surface-hover hover:text-ip-text shadow-sm'
+          <div className="flex items-center gap-2">
+            {isEditing && (
+              <>
+                <button
+                  onClick={() => setShowClearConfirm(true)}
+                  className="ip-btn flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all shadow-sm"
+                >
+                  <Trash2 size={14} />
+                  {t('clear_all')}
+                </button>
+                <button
+                  onClick={() => setShowWidgetLibrary(!showWidgetLibrary)}
+                  className={`ip-btn flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold border transition-all ${
+                    showWidgetLibrary 
+                    ? 'bg-ip-primary text-white border-ip-primary shadow-lg shadow-ip-primary/20' 
+                    : 'bg-ip-surface text-ip-text-secondary border-ip-border hover:bg-ip-surface-hover hover:text-ip-text shadow-sm'
+                  }`}
+                >
+                  <LayoutDashboard size={14} />
+                  {showWidgetLibrary ? t('close_library') : t('add_widget')}
+                </button>
+              </>
+            )}
+            {hasEdit && (
+              <button 
+                onClick={() => setIsEditing(!isEditing)}
+                className={`ip-btn flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold shadow-md transition-colors border ${
+                  isEditing 
+                  ? 'bg-ip-primary text-white border-ip-primary shadow-ip-primary/20' 
+                  : 'bg-ip-surface text-ip-text-secondary border-ip-border hover:bg-ip-surface-hover hover:text-ip-text shadow-slate-900/5'
                 }`}
               >
-                <LayoutDashboard size={14} />
-                {showWidgetLibrary ? t('close_library') : t('add_widget')}
+                <PencilLine size={14} />
+                {t('edit')}
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         
         <div className="-mx-4 sm:mx-0 relative flex gap-6">

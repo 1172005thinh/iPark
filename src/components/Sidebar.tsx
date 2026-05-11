@@ -108,14 +108,21 @@ export default function Sidebar() {
 
       {/* User Info + Logout */}
       <div className="border-t border-white/10 pt-4 mt-4">
-        {session.user && !sidebarCollapsed && (
-          <div className="px-3 mb-3 ip-fade-in">
-            <p className="text-sm text-white font-medium truncate">
-              {session.user.display_name}
-            </p>
-            <p className="text-xs text-ip-sidebar-text truncate">
-              {t(session.user.group as any) || session.user.group}
-            </p>
+        {session.user && (
+          <div className={`flex items-center gap-3 px-3 mb-3 ${sidebarCollapsed ? 'justify-center' : ''}`}>
+            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 shadow-inner border border-white/5">
+              <UserIcon />
+            </div>
+            {!sidebarCollapsed && (
+              <div className="min-w-0 ip-fade-in">
+                <p className="text-sm text-white font-semibold truncate leading-tight">
+                  {session.user.display_name}
+                </p>
+                <p className="text-[11px] text-white/50 truncate">
+                  {t(session.user.group as any) || session.user.group}
+                </p>
+              </div>
+            )}
           </div>
         )}
         <button
@@ -132,6 +139,24 @@ export default function Sidebar() {
 }
 
 /* ─── SVG Icons (inline for zero-dep) ──────────────────────────────── */
+
+function UserIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
 
 function DashboardIcon() {
   return (

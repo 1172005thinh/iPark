@@ -21,7 +21,7 @@ interface AuthStore {
   hasPermission: (permission: Permission) => boolean;
   guestSettings: {
     language: string;
-    theme: 'light' | 'dark' | 'system';
+    theme: 'Light' | 'Dark' | 'System';
   };
   setGuestSettings: (settings: Partial<AuthStore['guestSettings']>) => void;
   refreshSessionFromStores: () => void;
@@ -50,7 +50,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
   guestSettings: {
     language: 'English',
-    theme: 'system',
+    theme: 'System',
   },
 
   setGuestSettings: (settings) =>

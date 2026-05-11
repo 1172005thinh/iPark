@@ -732,9 +732,9 @@ export function useTranslation() {
   const session = useAuthStore((state) => state.session);
   const guestSettings = useAuthStore((state) => state.guestSettings);
   const users = useUserStore((state) => state.users);
-  
-  const currentUser = session.user 
-    ? users.find((u) => u.id === session.user?.id) ?? session.user 
+
+  const currentUser = session.user
+    ? users.find((u) => u.id === session.user?.id) ?? session.user
     : null;
 
   const language = currentUser?.language || guestSettings.language;
