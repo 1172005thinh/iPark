@@ -6,4 +6,4 @@
 4. Login errors did not get translated fully.
 5. Weird table layout cut at Users table in Settings page.
 6. Translation error at Name collumn at Parks table in Parks page.
-7. Notifications only popup if the Event history table has more than 60 (?)items.
+7. Notifications only popup if the Event history table has more than 60 (?) items.
