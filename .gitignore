@@ -45,3 +45,5 @@ next-env.d.ts
 docs/report.md
 AGENTS.md
 CLAUDE.md
+dev.log
+test-settings.js
