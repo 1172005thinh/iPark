@@ -45,7 +45,7 @@ export function Pagination({
     <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between border-t border-ip-border">
       <div className="flex items-center gap-4 text-sm text-ip-text-secondary">
         <div className="flex items-center gap-2">
-          <span>{t('view' as any) === 'View' ? 'Show' : 'Hiển thị'}</span>
+          <span>{t('showing')}</span>
           <select
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
@@ -61,7 +61,7 @@ export function Pagination({
         </div>
         <div className="hidden h-4 w-px bg-ip-border sm:block" />
         <p>
-          {t('loading' as any) === 'Loading...' ? 'Showing' : 'Hiển thị'} <span className="font-medium text-ip-text">{Math.min(totalItems, (currentPage - 1) * pageSize + 1)}</span> {t('loading' as any) === 'Loading...' ? 'to' : 'đến'}{' '}
+          {t('showing')} <span className="font-medium text-ip-text">{Math.min(totalItems, (currentPage - 1) * pageSize + 1)}</span> {t('to')}{' '}
           <span className="font-medium text-ip-text">{Math.min(totalItems, currentPage * pageSize)}</span> {t('of')}{' '}
           <span className="font-medium text-ip-text">{totalItems}</span> {t('results')}
         </p>

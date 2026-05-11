@@ -196,6 +196,7 @@ export default function SettingsPage() {
       enabledGroups.map((group) => group.group_name),
       enabledDashboardIds,
       editingUser,
+      t,
       currentUser?.id
     );
 
@@ -268,7 +269,7 @@ export default function SettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-ip-text">{t('settings')}</h1>
         <p className="mt-1 text-sm text-ip-text-secondary">
-          {t('loading' as any) === 'Loading...' ? 'System configuration and account management' : 'Cấu hình hệ thống và quản lý tài khoản'}
+          {t('settings_subtitle')}
         </p>
       </div>
 
@@ -281,28 +282,28 @@ export default function SettingsPage() {
             <div>
               <h2 className="text-lg font-semibold text-ip-text">{t('notifications')}</h2>
               <p className="text-sm text-ip-text-secondary">
-                {t('loading' as any) === 'Loading...' ? 'Live demo toggles for alert delivery preferences.' : 'Các tùy chọn nhận thông báo cho bản demo.'}
+                {t('notifications_desc')}
               </p>
             </div>
           </div>
           <div className="space-y-4">
             <SettingRow
-              label={t('loading' as any) === 'Loading...' ? 'Enable Notifications' : 'Bật thông báo'}
-              sublabel={t('loading' as any) === 'Loading...' ? 'Master toggle for all notification channels.' : 'Công tắc tổng cho tất cả các kênh thông báo.'}
+              label={t('enable_notifications')}
+              sublabel={t('enable_notifications_desc')}
               checked={notifications.notificationsEnabled}
               onToggle={() => handleNotificationToggle('notificationsEnabled')}
               disabled={!hasEdit}
             />
             <SettingRow
-              label={t('loading' as any) === 'Loading...' ? 'In-App Push Notifications' : 'Thông báo đẩy trong ứng dụng'}
-              sublabel={t('loading' as any) === 'Loading...' ? 'Receive push notifications within the app.' : 'Nhận thông báo đẩy ngay trong giao diện ứng dụng.'}
+              label={t('in_app_notifications')}
+              sublabel={t('in_app_notifications_desc')}
               checked={notifications.inAppEnabled}
               onToggle={() => handleNotificationToggle('inAppEnabled')}
               disabled={!hasEdit || !notifications.notificationsEnabled}
             />
             <SettingRow
-              label={t('loading' as any) === 'Loading...' ? 'Email Notifications' : 'Thông báo qua Email'}
-              sublabel={t('loading' as any) === 'Loading...' ? 'Receive event notifications via email.' : 'Nhận thông báo sự kiện qua địa chỉ email.'}
+              label={t('email_notifications')}
+              sublabel={t('email_notifications_desc')}
               checked={notifications.emailEnabled}
               onToggle={() => handleNotificationToggle('emailEnabled')}
               disabled={!hasEdit || !notifications.notificationsEnabled}
@@ -318,7 +319,7 @@ export default function SettingsPage() {
             <div>
               <h2 className="text-lg font-semibold text-ip-text">{t('language')} & {t('theme')}</h2>
               <p className="text-sm text-ip-text-secondary">
-                {t('loading' as any) === 'Loading...' ? 'Personalize your interface experience.' : 'Cá nhân hóa trải nghiệm giao diện của bạn.'}
+                {t('appearance_desc')}
               </p>
             </div>
           </div>
@@ -388,10 +389,10 @@ export default function SettingsPage() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-ip-text">
-                {t('loading' as any) === 'Loading...' ? 'Account Management' : 'Quản lý tài khoản'}
+                {t('account_management')}
               </h2>
               <p className="mt-1 text-sm text-ip-text-secondary">
-                {t('loading' as any) === 'Loading...' ? 'Live user store with admin-facing dialogs for account actions.' : 'Danh sách người dùng với các thao tác quản trị.'}
+                {t('account_management_desc')}
               </p>
             </div>
           </div>
@@ -423,7 +424,7 @@ export default function SettingsPage() {
               ) : (
                 <>
                   <span className="flex items-center rounded-full bg-ip-bg px-3 py-1 text-xs text-ip-text-muted">
-                    {t('loading' as any) === 'Loading...' ? 'Live user store' : 'Danh sách người dùng'}
+                    {t('live_user_store')}
                   </span>
                   {hasEdit ? (
                     <button
@@ -479,7 +480,7 @@ export default function SettingsPage() {
                     </th>
                   ))}
                   {hasEdit ? (
-                    <th className="px-4 py-3 text-right font-semibold">Actions</th>
+                    <th className="px-4 py-3 text-right font-semibold">{t('actions')}</th>
                   ) : null}
                 </tr>
               </thead>
@@ -503,7 +504,7 @@ export default function SettingsPage() {
                         <span>{user.user_name}</span>
                         {currentUser?.id === user.id ? (
                           <span className="rounded-full bg-ip-primary/10 px-2 py-0.5 text-[11px] font-medium text-ip-primary">
-                            You
+                            {t('you')}
                           </span>
                         ) : null}
                       </div>
@@ -536,7 +537,7 @@ export default function SettingsPage() {
                             className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-text-secondary hover:bg-ip-bg hover:text-ip-text"
                           >
                             <Eye size={14} />
-                            View
+                            {t('view')}
                           </button>
                           {user.is_online ? (
                             <button
@@ -545,7 +546,7 @@ export default function SettingsPage() {
                               className="ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-amber-600 hover:bg-amber-50 hover:text-amber-700"
                             >
                               <UserRoundX size={14} />
-                              Revoke
+                              {t('revoke')}
                             </button>
                           ) : null}
                           <button
@@ -555,16 +556,16 @@ export default function SettingsPage() {
                             className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-primary hover:bg-ip-primary/10 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                           >
                             <PencilLine size={14} />
-                            Edit
+                            {t('edit')}
                           </button>
                           <button
                             type="button"
                             onClick={() => setUserToDeleteId(user.id)}
                             disabled={selectedIds.size > 0}
-                            className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600 ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                            className={`ip-btn flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ip-error hover:bg-red-50 hover:text-ip-error ${selectedIds.size > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                           >
                             <Trash2 size={14} />
-                            Delete
+                            {t('delete')}
                           </button>
                         </div>
                       </td>
@@ -591,47 +592,47 @@ export default function SettingsPage() {
               <Info size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-ip-text">About iPark</h2>
+              <h2 className="text-lg font-semibold text-ip-text">{t('about_ipark')}</h2>
               <p className="text-sm text-ip-text-secondary">
-                System version and developer information.
+                {t('about_ipark_desc')}
               </p>
             </div>
           </div>
           <div className="grid gap-x-12 gap-y-2 md:grid-cols-2">
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
-              <span className="text-sm text-ip-text-secondary">Version</span>
-              <span className="text-sm font-medium text-ip-text">v1.2.6 (Stable)</span>
+              <span className="text-sm text-ip-text-secondary">{t('version')}</span>
+              <span className="text-sm font-medium text-ip-text">v1.3.0 (Stable)</span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
-              <span className="text-sm text-ip-text-secondary">Release Type</span>
+              <span className="text-sm text-ip-text-secondary">{t('release_type')}</span>
               <span className="text-sm font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border border-amber-100">
                 DEMO Release
               </span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
-              <span className="text-sm text-ip-text-secondary">Developers</span>
+              <span className="text-sm text-ip-text-secondary">{t('developers')}</span>
               <span className="text-sm font-medium text-ip-text text-right">TICSMTC - HCMUT 3rd CSE Group</span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-ip-border/50">
-              <span className="text-sm text-ip-text-secondary">Source Code</span>
+              <span className="text-sm text-ip-text-secondary">{t('source_code')}</span>
               <Link 
                 href="https://github.com/1172005thinh/iPark" 
                 target="_blank" 
                 className="text-sm font-medium text-ip-primary hover:underline flex items-center gap-1.5"
               >
                 <Code size={14} />
-                GitHub Repository
+                {t('github_repo')}
               </Link>
             </div>
           </div>
           <div className="flex gap-3 mt-6">
             <button className="ip-btn flex-1 flex items-center justify-center gap-2 rounded-xl border border-ip-border bg-ip-surface py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover">
               <HelpCircle size={16} />
-              Help Document
+              {t('help_document')}
             </button>
             <button className="ip-btn flex-1 flex items-center justify-center gap-2 rounded-xl border border-ip-border bg-ip-surface py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover">
               <Heart size={16} className="text-red-500" />
-              Donate
+              {t('donate')}
             </button>
           </div>
         </div>
@@ -655,10 +656,10 @@ export default function SettingsPage() {
       <AppDialog
         open={selectedUser !== null}
         onClose={() => setSelectedUserId(null)}
-        title={selectedUser ? selectedUser.display_name : 'User details'}
+        title={selectedUser ? selectedUser.display_name : t('user_details')}
         description={
           selectedUser
-            ? `Account #${selectedUser.id} profile, access, and preference details.`
+            ? t('user_profile_desc').replace('{id}', String(selectedUser.id))
             : undefined
         }
         icon={<ShieldUser size={22} />}
@@ -670,7 +671,7 @@ export default function SettingsPage() {
               onClick={() => setSelectedUserId(null)}
               className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
             >
-              Close
+              {t('close')}
             </button>
             {hasEdit && selectedUser ? (
               <button
@@ -681,7 +682,7 @@ export default function SettingsPage() {
                 }}
                 className="ip-btn rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
               >
-                Edit User
+                {t('edit')} {t('user')}
               </button>
             ) : null}
           </div>
@@ -689,35 +690,35 @@ export default function SettingsPage() {
       >
         {selectedUser ? (
           <div className="grid gap-4 md:grid-cols-2">
-            <DetailItem label="Username" value={selectedUser.user_name} />
-            <DetailItem label="Display Name" value={selectedUser.display_name} />
-            <DetailItem label="Email" value={selectedUser.email} />
+            <DetailItem label={t('username')} value={selectedUser.user_name} />
+            <DetailItem label={t('display_name')} value={selectedUser.display_name} />
+            <DetailItem label={t('email')} value={selectedUser.email} />
             <DetailItem
-              label="Group"
+              label={t('group')}
               value={groupLabelMap[selectedUser.group] ?? selectedUser.group}
             />
-            <DetailItem label="Description" value={selectedUser.description} />
+            <DetailItem label={t('description')} value={selectedUser.description} />
             <DetailItem
-              label="Pinned Dashboard"
+              label={t('pinned_dashboard')}
               value={String(selectedUser.pinned_dashboard_id)}
             />
-            <DetailItem label="Language" value={selectedUser.language} />
-            <DetailItem label="Theme" value={selectedUser.theme} />
+            <DetailItem label={t('language')} value={selectedUser.language} />
+            <DetailItem label={t('theme')} value={selectedUser.theme} />
             <DetailItem
-              label="Status"
+              label={t('status')}
               value={<StatusPill active={selectedUser.is_enable} />}
             />
             <DetailItem
-              label="Online"
+              label={t('online')}
               value={<OnlinePill active={selectedUser.is_online} />}
             />
-            <DetailItem label="Created At" value={selectedUser.created_at} />
+            <DetailItem label={t('created_at')} value={selectedUser.created_at} />
             <DetailItem
-              label="Last Modified"
+              label={t('last_modified')}
               value={selectedUser.last_modified_at}
             />
             <DetailItem
-              label="Last Active"
+              label={t('last_active')}
               value={selectedUser.last_active}
               className="md:col-span-2"
             />
@@ -728,11 +729,11 @@ export default function SettingsPage() {
       <AppDialog
         open={formDialog !== null}
         onClose={closeFormDialog}
-        title={formDialog?.mode === 'edit' ? 'Edit User' : 'Add User'}
+        title={formDialog?.mode === 'edit' ? `${t('edit')} ${t('user')}` : `${t('add')} ${t('user')}`}
         description={
           formDialog?.mode === 'edit'
-            ? 'Update account profile, access group, and credentials.'
-            : 'Create a new user in the live session store.'
+            ? t('edit_user_desc')
+            : t('create_user_desc')
         }
         icon={
           formDialog?.mode === 'edit' ? (
@@ -749,30 +750,30 @@ export default function SettingsPage() {
               onClick={closeFormDialog}
               className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
               form="user-form"
               className="ip-btn rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
             >
-              {formDialog?.mode === 'edit' ? 'Save Changes' : 'Create User'}
+              {formDialog?.mode === 'edit' ? t('save_changes') : `${t('add')} ${t('user' as any)}`}
             </button>
           </div>
         }
       >
         <form id="user-form" onSubmit={handleSaveUser} className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Username" htmlFor="user_name" hint="Unique object name using letters, numbers, and underscores.">
+            <FormField label={t('username')} htmlFor="user_name" hint={t('obj_name_hint' as any)}>
               <input
                 id="user_name"
                 value={formState.user_name}
                 onChange={(event) => updateForm('user_name', event.target.value)}
                 className="ip-input"
-                placeholder="user_name"
+                placeholder={t('username')}
               />
             </FormField>
-            <FormField label="Display Name" htmlFor="display_name">
+            <FormField label={t('display_name')} htmlFor="display_name">
               <input
                 id="display_name"
                 value={formState.display_name}
@@ -780,11 +781,11 @@ export default function SettingsPage() {
                   updateForm('display_name', event.target.value)
                 }
                 className="ip-input"
-                placeholder="Display Name"
+                placeholder={t('display_name')}
               />
             </FormField>
             <FormField
-              label="Description"
+              label={t('description')}
               htmlFor="description"
               className="md:col-span-2"
             >
@@ -796,7 +797,7 @@ export default function SettingsPage() {
                 }
                 rows={3}
                 className="ip-input min-h-[104px] resize-y"
-                placeholder="Short account description"
+                placeholder={t('description')}
               />
             </FormField>
             <FormField
@@ -1079,6 +1080,7 @@ function DetailItem({
 }
 
 function StatusPill({ active }: { active: boolean }) {
+  const { t } = useTranslation();
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -1086,12 +1088,13 @@ function StatusPill({ active }: { active: boolean }) {
       }`}
     >
       {active ? <UserRoundCheck size={13} /> : <UserRoundX size={13} />}
-      {active ? 'Enabled' : 'Disabled'}
+      {active ? t('enabled') : t('disabled')}
     </span>
   );
 }
 
 function OnlinePill({ active }: { active: boolean }) {
+  const { t } = useTranslation();
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -1099,7 +1102,7 @@ function OnlinePill({ active }: { active: boolean }) {
       }`}
     >
       {active ? <UserRoundCheck size={13} /> : <LockKeyhole size={13} />}
-      {active ? 'Online' : 'Offline'}
+      {active ? t('online') : t('offline')}
     </span>
   );
 }
@@ -1142,6 +1145,7 @@ function validateUserForm(
   enabledGroups: string[],
   enabledDashboardIds: number[],
   editingUser: User | null,
+  t: (key: any) => string,
   currentUserId?: number
 ) {
   const userName = formState.user_name.trim();
@@ -1157,11 +1161,11 @@ function validateUserForm(
     !email ||
     !formState.password
   ) {
-    return 'Fill in all user details before saving.';
+    return t('fill_all_user_details');
   }
 
   if (!/^[A-Za-z0-9_]+$/.test(userName)) {
-    return 'Username must use letters, numbers, and underscores only.';
+    return t('username_format_error');
   }
 
   if (
@@ -1169,7 +1173,7 @@ function validateUserForm(
       (user) => user.user_name === userName && user.id !== editingUser?.id
     )
   ) {
-    return 'Username must be unique.';
+    return t('username_unique_error');
   }
 
   if (
@@ -1177,17 +1181,17 @@ function validateUserForm(
     currentUserId !== editingUser.id &&
     email !== editingUser.email
   ) {
-    return 'Only the account owner can change this email address.';
+    return t('email_owner_error');
   }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return 'Enter a valid email address.';
+    return t('email_format_error');
   }
 
   if (
     users.some((user) => user.email === email && user.id !== editingUser?.id)
   ) {
-    return 'Email must be unique.';
+    return t('email_unique_error');
   }
 
   if (
@@ -1195,19 +1199,19 @@ function validateUserForm(
       formState.password
     )
   ) {
-    return 'Password must be at least 8 characters and include upper, lower, number, and special character.';
+    return t('password_format_error');
   }
 
   if (!enabledGroups.includes(formState.group)) {
-    return 'Select a valid enabled group.';
+    return t('select_valid_group');
   }
 
   if (!Number.isInteger(pinnedDashboardId) || pinnedDashboardId < 1) {
-    return 'Pinned dashboard must be a whole number greater than zero.';
+    return t('pinned_dashboard_number_error');
   }
 
   if (!enabledDashboardIds.includes(pinnedDashboardId)) {
-    return 'Pinned dashboard must reference an enabled dashboard.';
+    return t('pinned_dashboard_exists_error');
   }
 
   return null;

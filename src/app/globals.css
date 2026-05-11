@@ -52,6 +52,7 @@
   --color-ip-success: var(--ip-success);
   --color-ip-warning: var(--ip-warning);
   --color-ip-danger: var(--ip-danger);
+  --color-ip-error: var(--ip-danger);
   --color-ip-bg: var(--ip-bg);
   --color-ip-surface: var(--ip-surface);
   --color-ip-surface-hover: var(--ip-surface-hover);
@@ -189,3 +190,80 @@ body {
 .ip-slide-in {
   animation: slideInLeft 300ms ease-out;
 }
+
+/* ─── Dashboard Custom Handles ─────────────────────────────────────── */
+
+.react-grid-item > .react-resizable-handle {
+  z-index: 30 !important;
+  opacity: 0;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.react-grid-item:hover > .react-resizable-handle {
+  opacity: 1;
+}
+
+.react-resizable-handle-s {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  cursor: s-resize;
+  background: linear-gradient(to bottom, transparent, var(--ip-primary) 80%);
+}
+
+.react-resizable-handle-e {
+  right: 0;
+  top: 0;
+  width: 8px;
+  height: 100%;
+  cursor: e-resize;
+  background: linear-gradient(to right, transparent, var(--ip-primary) 80%);
+}
+
+.react-resizable-handle-se {
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: se-resize;
+  background: transparent;
+  z-index: 40 !important;
+}
+
+.ip-edit-control {
+  background: var(--ip-surface);
+  color: var(--ip-text);
+  border: 1px solid var(--ip-border);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+}
+
+.ip-dropdown-blend {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 4px !important;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--ip-text-secondary);
+  transition: color 150ms ease;
+}
+
+.ip-dropdown-blend:hover {
+  color: var(--ip-primary);
+}
+
+/* Ensure options in dropdown are themed */
+.ip-dropdown-blend option {
+  background: var(--ip-surface);
+  color: var(--ip-text);
+}
+
+.ip-btn-delete-glow:hover {
+  color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+}
+
+

@@ -7,6 +7,7 @@ import {
   Info,
   Trash2,
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 import { AppDialog, type DialogTone } from './AppDialog';
 
 const confirmButtonClasses: Record<DialogTone, string> = {
@@ -47,12 +48,16 @@ export function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   tone = 'default',
   isProcessing = false,
   children,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+  const finalConfirmLabel = confirmLabel || t('confirm');
+  const finalCancelLabel = cancelLabel || t('cancel');
+
   return (
     <AppDialog
       open={open}
@@ -70,7 +75,7 @@ export function ConfirmDialog({
             disabled={isProcessing}
             className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {cancelLabel}
+            {finalCancelLabel}
           </button>
           <button
             type="button"
@@ -78,7 +83,7 @@ export function ConfirmDialog({
             disabled={isProcessing}
             className={`ip-btn rounded-xl px-4 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${confirmButtonClasses[tone]}`}
           >
-            {confirmLabel}
+            {finalConfirmLabel}
           </button>
         </div>
       }

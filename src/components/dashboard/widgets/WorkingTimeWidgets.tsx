@@ -96,8 +96,8 @@ export function WorkingTimeWidgets({ ds }: { ds: WorkingTimeDataSource }) {
 
   if (ds.type === 'chart_curr_total_working_time') {
     return (
-      <div className="w-full h-full min-h-[100px]">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="w-full h-full min-h-[140px] relative">
+        <ResponsiveContainer width="100%" height="100%" debounce={50}>
           <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
             <XAxis dataKey="name" fontSize={10} stroke="var(--ip-text-muted)" />
             <YAxis fontSize={10} stroke="var(--ip-text-muted)" />

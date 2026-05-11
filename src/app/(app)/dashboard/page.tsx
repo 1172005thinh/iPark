@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
+import { WidgetLibrary } from '@/components/dashboard/WidgetLibrary';
 import { useDashboardStore } from '@/stores/dashboard-store';
 import { AppDialog } from '@/components/dialogs/AppDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
@@ -13,7 +14,7 @@ import { useSystemStateStore } from '@/stores/system-state-store';
 import { useUserStore } from '@/stores/user-store';
 import { dateKey, sameDay } from '@/lib/ipark-utils';
 import { useTranslation } from '@/lib/i18n';
-import { Pin, Plus, Trash2, PencilLine } from 'lucide-react';
+import { Pin, Plus, Trash2, PencilLine, RefreshCw, LayoutDashboard } from 'lucide-react';
 
 export default function DashboardPage() {
   const { session } = useAuthStore();
@@ -42,6 +43,7 @@ export default function DashboardPage() {
   const [selectedDashboardId, setSelectedDashboardId] = useState(
     activeUser?.pinned_dashboard_id || enabledDashboards[0]?.id
   );
+  const [showWidgetLibrary, setShowWidgetLibrary] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -196,7 +198,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-ip-text">{t('dashboard')}</h1>
           <p className="text-sm text-ip-text-secondary mt-1">
-            Welcome back, {session.user?.display_name}
+            {t('welcome_back').replace('{name}', session.user?.display_name || '')}
           </p>
         </div>
         
@@ -228,7 +230,8 @@ export default function DashboardPage() {
           {hasAdd && (
             <button
               onClick={openAddDialog}
-              className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
+              disabled={isEditing}
+              className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus size={16} />
               {t('add')}
@@ -241,7 +244,8 @@ export default function DashboardPage() {
                 setDialogError('');
                 setShowDeleteDialog(true);
               }}
-              className="ip-btn flex items-center gap-2 rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+              disabled={isEditing}
+              className="ip-btn flex items-center gap-2 rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Trash2 size={16} />
               {t('delete')}
@@ -266,68 +270,104 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
-          label="Total Parks"
+          label={t('total_parks')}
           value={String(parks.length)}
-          sublabel={`${operatingParks} operating`}
+          sublabel={`${operatingParks} ${t('operating_lc')}`}
           color="var(--ip-primary)"
         />
         <StatCard
-          label="Active Staff"
+          label={t('active_staff')}
           value={String(activeStaff)}
-          sublabel={`of ${enabledStaff.length} enabled`}
+          sublabel={`${t('of')} ${enabledStaff.length} ${t('enabled')}`}
           color="var(--ip-success)"
         />
         <StatCard
-          label="Events Today"
+          label={t('events_today')}
           value={String(todayEvents)}
-          sublabel={`${unacknowledgedTodayEvents} unacknowledged`}
+          sublabel={`${unacknowledgedTodayEvents} ${t('unacknowledged')}`}
           color="var(--ip-warning)"
         />
         <StatCard
-          label="System Status"
-          value={systemStatus.value}
+          label={t('system_status')}
+          value={t(systemStatus.value.toLowerCase() as any)}
           sublabel={systemStatus.detail}
           color={systemStatus.color}
         />
       </div>
 
       <div className="mt-8">
-        <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-lg font-semibold text-ip-text">
-            {currentDashboard.display_name}
-          </h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-ip-text">
+              {currentDashboard.display_name}
+            </h2>
+            <button
+              type="button"
+              className="rounded-lg p-1.5 text-ip-text-secondary hover:bg-ip-surface-hover hover:text-ip-text transition-colors"
+              title={t('refresh_data')}
+              onClick={() => {
+                // Future integration for data refresh
+              }}
+            >
+              <RefreshCw size={16} />
+            </button>
+            {isEditing && (
+              <span className="text-xs bg-ip-warning/10 text-ip-warning px-2 py-1 rounded-full animate-pulse ml-2">
+                {t('edit_mode_active')}
+              </span>
+            )}
+          </div>
+          
           {isEditing && (
-            <span className="text-xs bg-ip-warning/10 text-ip-warning px-2 py-1 rounded-full animate-pulse">
-              Edit Mode Active
-            </span>
+            <button
+              onClick={() => setShowWidgetLibrary(!showWidgetLibrary)}
+              className={`ip-btn flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold border transition-all ${
+                showWidgetLibrary 
+                ? 'bg-ip-primary text-white border-ip-primary shadow-lg shadow-ip-primary/20' 
+                : 'bg-ip-surface text-ip-text-secondary border-ip-border hover:bg-ip-surface-hover hover:text-ip-text shadow-sm'
+              }`}
+            >
+              <LayoutDashboard size={14} />
+              {showWidgetLibrary ? t('close_library') : t('add_widget')}
+            </button>
           )}
         </div>
         
-        <div className="-mx-4 sm:mx-0">
-          <DashboardGrid 
-            dashboard={currentDashboard} 
-            isEditing={isEditing} 
-            onLayoutChange={(layout) => {
-              if (isEditing && Array.isArray(layout)) {
-                layout.forEach((item: { i: string; x: number; y: number; w: number; h: number }) => {
-                  updateWidgetLayout(currentDashboard.id, item.i, {
-                    position_x: item.x,
-                    position_y: item.y,
-                    width: item.w,
-                    height: item.h,
+        <div className="-mx-4 sm:mx-0 relative flex gap-6">
+          <div className={`flex-grow transition-all duration-300 ${showWidgetLibrary ? 'w-2/3' : 'w-full'}`}>
+            <DashboardGrid 
+              dashboard={currentDashboard} 
+              isEditing={isEditing} 
+              onLayoutChange={(layout) => {
+                if (isEditing && Array.isArray(layout)) {
+                  layout.forEach((item: { i: string; x: number; y: number; w: number; h: number }) => {
+                    updateWidgetLayout(currentDashboard.id, item.i, {
+                      position_x: item.x,
+                      position_y: item.y,
+                      width: item.w,
+                      height: item.h,
+                    });
                   });
-                });
-              }
-            }}
-          />
+                }
+              }}
+            />
+          </div>
+
+          {showWidgetLibrary && isEditing && (
+            <div className="w-80 shrink-0 sticky top-4 h-[calc(100vh-200px)] ip-slide-in">
+              <div className="ip-card h-full flex flex-col overflow-hidden">
+                <WidgetLibrary dashboardId={currentDashboard.id} onClose={() => setShowWidgetLibrary(false)} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       <AppDialog
         open={showAddDialog}
         onClose={() => setShowAddDialog(false)}
-        title="Create Dashboard"
-        description="Create a new dashboard by cloning the current widget layout. You can rearrange it afterward."
+        title={t('create_dashboard')}
+        description={t('create_dashboard_desc')}
         size="lg"
         footer={
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -336,21 +376,21 @@ export default function DashboardPage() {
               onClick={() => setShowAddDialog(false)}
               className="ip-btn rounded-xl border border-ip-border bg-ip-surface px-4 py-2.5 text-sm font-medium text-ip-text-secondary hover:bg-ip-surface-hover"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="button"
               onClick={handleAddDashboard}
               className="ip-btn rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/20 hover:bg-ip-primary/90"
             >
-              Create Dashboard
+              {t('create_dashboard')}
             </button>
           </div>
         }
       >
         <div className="space-y-4">
           <label className="block text-sm text-ip-text-secondary">
-            Dashboard Name
+            {t('dashboard_name')}
             <input
               value={dashboardForm.dashboard_name}
               onChange={(event) =>
@@ -364,7 +404,7 @@ export default function DashboardPage() {
             />
           </label>
           <label className="block text-sm text-ip-text-secondary">
-            Display Name
+            {t('display_name')}
             <input
               value={dashboardForm.display_name}
               onChange={(event) =>
@@ -378,7 +418,7 @@ export default function DashboardPage() {
             />
           </label>
           <label className="block text-sm text-ip-text-secondary">
-            Description
+            {t('description')}
             <textarea
               value={dashboardForm.description}
               onChange={(event) =>
@@ -388,7 +428,7 @@ export default function DashboardPage() {
                 }))
               }
               className="ip-input mt-1 min-h-24 resize-none"
-              placeholder="Describe what this dashboard is for"
+              placeholder={t('description')}
             />
           </label>
         </div>
@@ -403,9 +443,9 @@ export default function DashboardPage() {
         open={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDeleteDashboard}
-        title={`Delete "${currentDashboard.display_name}"?`}
-        description="This removes the dashboard configuration for every user who can access it."
-        confirmLabel="Delete Dashboard"
+        title={t('delete_dashboard_confirm').replace('{name}', currentDashboard.display_name)}
+        description={t('delete_dashboard_desc')}
+        confirmLabel={t('delete')}
         tone="danger"
       >
         {dialogError ? (
@@ -414,7 +454,7 @@ export default function DashboardPage() {
           </div>
         ) : null}
         <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Dashboard widgets and layout changes will be removed permanently.
+          {t('delete_dashboard_warning')}
         </div>
       </ConfirmDialog>
     </div>

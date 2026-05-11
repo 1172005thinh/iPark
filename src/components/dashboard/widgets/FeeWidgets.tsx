@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
 import { FeeDataSource } from '@/types/database';
 import { useParkStore } from '@/stores/park-store';
+import { useTranslation } from '@/lib/i18n';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
+  const { t } = useTranslation();
   const { parks } = useParkStore();
   const park = ds.park !== 'ALL' ? parks.find((item) => item.id.toString() === ds.park && item.is_enable) : null;
   const enabledParks = parks.filter((item) => item.is_enable);
@@ -17,15 +19,19 @@ export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
   );
 
   if (ds.type === 'curr_fee') {
-    const fee = park?.fee ?? (enabledParks[0]?.fee ?? 0);
-    const parkName = park?.display_name ?? 'All Parks';
+    const isAll = ds.park === 'ALL';
+    const fee = isAll 
+      ? (enabledParks.length > 0 ? Math.round(enabledParks.reduce((sum, p) => sum + p.fee, 0) / enabledParks.length) : 0)
+      : (park?.fee ?? 0);
+    const parkLabel = isAll ? t('all_parks_avg') : (park?.display_name ?? 'Unknown Park');
+    
     return (
       <div className="flex flex-col items-center justify-center text-center">
         <div className="text-3xl font-bold text-ip-accent">
           {fee.toLocaleString()} <span className="text-lg text-ip-text-secondary">{ds.unit}</span>
         </div>
         <div className="text-xs text-ip-text-muted mt-1 uppercase tracking-wider">
-          Entry Fee · {parkName}
+          {t('entry_fee')} · {parkLabel}
         </div>
       </div>
     );
@@ -50,8 +56,8 @@ export function FeeWidgets({ ds }: { ds: FeeDataSource }) {
 
   if (ds.type === 'chart_estimate_income') {
     return (
-      <div className="w-full h-full min-h-[120px]">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="w-full h-full min-h-[140px] relative">
+        <ResponsiveContainer width="100%" height="100%" debounce={50}>
           <LineChart data={incomeData} margin={{ top: 5, right: 5, left: 10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ip-border)" vertical={false} />
             <XAxis dataKey="name" fontSize={10} stroke="var(--ip-text-muted)" />

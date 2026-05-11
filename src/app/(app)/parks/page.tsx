@@ -100,13 +100,13 @@ export default function ParksPage() {
   }
 
   const columns = [
-    { key: 'id', label: 'ID' },
-    { key: 'display_name', label: 'Name' },
-    { key: 'location', label: 'Location' },
-    { key: 'fee', label: 'Fee (VND)' },
-    { key: 'max_slot', label: 'Max Slots' },
-    { key: 'is_enable', label: 'Enabled' },
-    { key: 'is_operating', label: 'Operating' },
+    { key: 'id', label: t('id') },
+    { key: 'display_name', label: t('name') },
+    { key: 'location', label: t('location') },
+    { key: 'fee', label: t('fee_vnd') },
+    { key: 'max_slot', label: t('max_slots') },
+    { key: 'is_enable', label: t('enabled') },
+    { key: 'is_operating', label: t('operating') },
   ];
 
   const showActions = hasView || hasEdit || hasDelete;
@@ -209,10 +209,11 @@ export default function ParksPage() {
     <div className="ip-fade-in">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-ip-text">Parks</h1>
+          <h1 className="text-2xl font-bold text-ip-text">{t('parks')}</h1>
           <p className="mt-1 text-sm text-ip-text-secondary">
-            {parks.length} park{parks.length === 1 ? '' : 's'} registered in the
-            system
+            {parks.length === 1 
+              ? t('park_registered_single').replace('{count}', parks.length.toString())
+              : t('park_registered').replace('{count}', parks.length.toString())}
           </p>
         </div>
 
@@ -242,7 +243,7 @@ export default function ParksPage() {
           ) : (
             <>
               <span className="rounded-full bg-ip-bg px-3 py-1 text-xs text-ip-text-muted">
-                Editable Store
+                {t('editable_store')}
               </span>
               {hasAdd ? (
                 <button
@@ -251,7 +252,7 @@ export default function ParksPage() {
                   className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/25 hover:bg-ip-primary/90"
                 >
                   <Plus size={16} />
-                  Add Park
+                  {t('add_park')}
                 </button>
               ) : null}
             </>
@@ -291,7 +292,7 @@ export default function ParksPage() {
                 ))}
                 {showActions ? (
                   <th className="px-5 py-3.5 text-right font-semibold text-ip-text-secondary">
-                    Actions
+                    {t('actions')}
                   </th>
                 ) : null}
               </tr>

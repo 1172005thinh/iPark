@@ -78,10 +78,10 @@ export default function EventsPage() {
   };
 
   const cols = [
-    { key: 'id', label: 'ID' }, { key: 'event_code', label: 'Code' },
-    { key: 'event_name', label: 'Event' }, { key: 'event_type', label: 'Type' },
-    { key: 'at_park_id', label: 'Park' }, { key: 'received_time', label: 'Received' },
-    { key: 'is_acknowledged', label: 'Ack' },
+    { key: 'id', label: t('id') }, { key: 'event_code', label: t('code') },
+    { key: 'event_name', label: t('events') }, { key: 'event_type', label: t('type') },
+    { key: 'at_park_id', label: t('park') }, { key: 'received_time', label: t('received') },
+    { key: 'is_acknowledged', label: t('ack') },
   ];
 
   const typeColors: Record<string, string> = {

@@ -1,26 +1,19 @@
-const puppeteer = require('puppeteer');
-
+const { chromium } = require('playwright');
 (async () => {
-  const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+  const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   
-  // Navigate to login
-  await page.goto('http://localhost:3000/login');
-  await page.type('input[placeholder="username"]', 'admin');
-  await page.type('input[placeholder="password"]', 'Admin@123');
-  await page.click('button[type="submit"]');
-  
-  // Wait for dashboard to load
-  await page.waitForNavigation();
-  
-  // Navigate to settings
   page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
-  page.on('pageerror', err => console.log('BROWSER ERROR:', err.toString()));
+  page.on('pageerror', error => console.log('BROWSER ERROR:', error.message));
+
+  await page.goto('http://localhost:3000/login');
+  await page.fill('input[type="text"]', 'admin');
+  await page.fill('input[type="password"]', 'Admin@123');
+  await page.click('button[type="submit"]');
+  await page.waitForTimeout(1000);
   
-  await page.goto('http://localhost:3000/settings', { waitUntil: 'networkidle0' });
-  
-  const bodyText = await page.evaluate(() => document.body.innerText);
-  console.log('PAGE TEXT:\n', bodyText.substring(0, 500));
+  await page.goto('http://localhost:3000/settings');
+  await page.waitForTimeout(2000);
   
   await browser.close();
 })();

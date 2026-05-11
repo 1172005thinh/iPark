@@ -3,8 +3,8 @@ import type { Staff } from '@/types/database';
 export const STAFF_DB: Staff[] = [
   {
     id: 1,
-    staff_name: 'john_doe',
-    display_name: 'John Doe',
+    staff_name: 'phu_nguyen_hoang_minh',
+    display_name: 'Phú Nguyễn Hoàng Minh',
     description: 'A staff member who works in the central park',
     at_park_id: 1,
     start_time: '08:00:00',
@@ -19,8 +19,8 @@ export const STAFF_DB: Staff[] = [
   },
   {
     id: 2,
-    staff_name: 'jane_smith',
-    display_name: 'Jane Smith',
+    staff_name: 'nguyen_duong_khoi',
+    display_name: 'Nguyên Dương Khôi',
     description: 'A manager who works in the north park',
     at_park_id: 2,
     start_time: '09:00:00',
@@ -35,8 +35,8 @@ export const STAFF_DB: Staff[] = [
   },
   {
     id: 3,
-    staff_name: 'mike_tran',
-    display_name: 'Mike Tran',
+    staff_name: 'hoang_nguyen_thai',
+    display_name: 'Hoàng Nguyễn Thái',
     description: 'Night shift attendant at the central park',
     at_park_id: 1,
     start_time: '18:00:00',
@@ -51,8 +51,8 @@ export const STAFF_DB: Staff[] = [
   },
   {
     id: 4,
-    staff_name: 'anna_nguyen',
-    display_name: 'Anna Nguyen',
+    staff_name: 'phong_le_thanh',
+    display_name: 'Phong Lê Thanh',
     description: 'Supervisor at the south park',
     at_park_id: 3,
     start_time: '06:00:00',
@@ -67,8 +67,8 @@ export const STAFF_DB: Staff[] = [
   },
   {
     id: 5,
-    staff_name: 'peter_le',
-    display_name: 'Peter Le',
+    staff_name: 'thinh_nguyen_hung',
+    display_name: 'Thịnh Nguyễn Hưng',
     description: 'Former attendant — currently disabled',
     at_park_id: 2,
     start_time: '07:00:00',
@@ -83,8 +83,8 @@ export const STAFF_DB: Staff[] = [
   },
   {
     id: 6,
-    staff_name: 'lisa_pham',
-    display_name: 'Lisa Pham',
+    staff_name: 'phuc_tao_nguyen_tam',
+    display_name: 'Phúc Tào Nguyễn Tâm',
     description: 'Attendant at north park',
     at_park_id: 2,
     start_time: '09:00:00',
@@ -99,8 +99,8 @@ export const STAFF_DB: Staff[] = [
   },
   {
     id: 7,
-    staff_name: 'tony_pham',
-    display_name: 'Tony Pham',
+    staff_name: 'son_ha_trong',
+    display_name: 'Sơn Hà Trọng',
     description: 'Supervisor at the south park',
     at_park_id: 3,
     start_time: '06:00:00',

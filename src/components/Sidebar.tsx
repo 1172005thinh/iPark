@@ -48,7 +48,7 @@ export default function Sidebar() {
         className={`absolute -right-4 top-12 flex h-8 w-8 items-center justify-center rounded-2xl border-2 border-white bg-ip-primary text-white shadow-xl transition-all hover:scale-110 active:scale-95 z-[60] ${
           sidebarCollapsed ? 'translate-x-0' : 'translate-x-0'
         }`}
-        title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+        title={sidebarCollapsed ? t('expand_sidebar') : t('collapse_sidebar')}
       >
         <svg
           width="18"
@@ -73,6 +73,8 @@ export default function Sidebar() {
               src="/logo.ico" 
               alt="iPark Logo" 
               fill 
+              sizes="(max-width: 768px) 36px, 36px"
+              priority
               className="object-contain p-1"
             />
           </div>

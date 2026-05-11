@@ -107,13 +107,13 @@ export default function StaffsPage() {
   }
 
   const columns = [
-    { key: 'id', label: 'ID' },
-    { key: 'display_name', label: 'Name' },
-    { key: 'at_park_id', label: 'Park' },
-    { key: 'role', label: 'Role' },
-    { key: 'payment', label: 'Payment (VND)' },
-    { key: 'is_enable', label: 'Enabled' },
-    { key: 'is_on_shift', label: 'On Shift' },
+    { key: 'id', label: t('id') },
+    { key: 'display_name', label: t('name') },
+    { key: 'at_park_id', label: t('park') },
+    { key: 'role', label: t('role') },
+    { key: 'payment', label: t('payment_vnd') },
+    { key: 'is_enable', label: t('enabled') },
+    { key: 'is_on_shift', label: t('on_shift') },
   ];
 
   const showActions = hasView || hasEdit || hasDelete;
@@ -220,10 +220,11 @@ export default function StaffsPage() {
     <div className="ip-fade-in">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-ip-text">Staffs</h1>
+          <h1 className="text-2xl font-bold text-ip-text">{t('staffs')}</h1>
           <p className="mt-1 text-sm text-ip-text-secondary">
-            {staffs.length} staff member{staffs.length === 1 ? '' : 's'} registered
-            in the system
+            {staffs.length === 1 
+              ? t('staff_registered_single').replace('{count}', staffs.length.toString())
+              : t('staff_registered').replace('{count}', staffs.length.toString())}
           </p>
         </div>
 
@@ -253,7 +254,7 @@ export default function StaffsPage() {
           ) : (
             <>
               <span className="rounded-full bg-ip-bg px-3 py-1 text-xs text-ip-text-muted">
-                Editable Store
+                {t('editable_store')}
               </span>
               {hasAdd ? (
                 <button
@@ -262,7 +263,7 @@ export default function StaffsPage() {
                   className="ip-btn flex items-center gap-2 rounded-xl bg-ip-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ip-primary/25 hover:bg-ip-primary/90"
                 >
                   <Plus size={16} />
-                  Add Staff
+                  {t('add_staff')}
                 </button>
               ) : null}
             </>
@@ -302,7 +303,7 @@ export default function StaffsPage() {
                 ))}
                 {showActions ? (
                   <th className="px-5 py-3.5 text-right font-semibold text-ip-text-secondary">
-                    Actions
+                    {t('actions')}
                   </th>
                 ) : null}
               </tr>

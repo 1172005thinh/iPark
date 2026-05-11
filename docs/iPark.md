@@ -30,6 +30,18 @@ Dashboard is a collection of widgets that are displayed on the home page of the 
 
 A dropdown menu to select the dashboard to view. The dashboard that is pinned will be loaded by default when the user logs in. Users can pin/unpin the dashboard to set it as the default dashboard to load when they log in.
 
+The dashboards page features:
+- A **Refresh** button located at the right of the dashboard name label to trigger a data refresh.
+
+When **Editing Dashboard**:
+- The top **Add** and **Delete** dashboard buttons must be disabled.
+- An **Add Widget** button should be available at the right, on the same line as the Dashboard name label.
+- Clicking **Add Widget** opens a right split view displaying all available widgets (refer to pre-configured widgets below).
+- Users can drag-and-drop the desired widget from the split view onto the current viewing dashboard.
+- To delete a widget from the dashboard, users can either:
+  1. Click the red X button at the top right corner of the widget (sitting on the curve line).
+  2. Drag the widget to the right edge of the screen (a red glow with a bin icon will show up) and release the mouse click.
+
 Quick actions:
 
 - **View**: view the dashboard with the widgets, pin/unpin. Requires `view_dashboard` permission
@@ -41,6 +53,13 @@ Quick actions:
 ### 1.2. WIDGET
 
 Widget is a component that displays specific information or functionality on the dashboard. Each widget has a specific data source and parameters that determine what information it shows and how it shows it **however the `datasource` is not editable**.
+
+**Individual Widget Edit UI**:
+- The **Lock/Unlock** button must be positioned to the right of the Drag icon, horizontally aligned, preventing them from overlapping.
+- The **Park dropdown box** must be located at the bottom left corner of the widget. Selecting a park will specifically refresh this widget's datasource. (Note: Avoid hard-coding options like "All parks", "Central park", use actual DB values).
+- The **Interval dropdown box** must be located to the right of the Park dropdown box. This is only visible for widgets that actually require an Interval attribute.
+- The **Resize button** must be curve-shaped (with blue background color) based on the widget's curve. Its location should be adaptive to the widget's real-time dimensions (ensure short widgets like "Time" display it in the correct location).
+- All UI elements must follow the application's curve-shaped theme accordingly.
 
 Attributes:
 *(DEV NOTE: These attributes map directly to the keys inside the JSON objects stored in the `widgets_list` array of `DASHBOARD_DB`. Ensure your code handles this JSON mapping when rendering widgets).*

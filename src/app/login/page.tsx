@@ -63,7 +63,7 @@ export default function LoginPage() {
     if (result.success) {
       router.replace('/dashboard');
     } else {
-      setError(result.error || 'An unknown error occurred');
+      setError(result.error ? t(result.error as any) : t('login_failed_unknown'));
     }
 
     setIsLoading(false);
@@ -74,13 +74,11 @@ export default function LoginPage() {
     const user = getUserByEmail(forgotEmail);
 
     if (!user) {
-      setForgotMessage('If this email is registered, the password has been reset.');
+      setForgotMessage(t('forgot_password_success'));
     } else {
       // Reset password to default
       useUserStore.getState().updateUser(user.id, { password: 'Password@123' });
-      setForgotMessage(
-        'Password has been reset to the default value. You can now log in with: Password@123'
-      );
+      setForgotMessage(t('password_reset_default_msg'));
     }
   };
 
@@ -109,6 +107,8 @@ export default function LoginPage() {
               src="/logo.ico" 
               alt="iPark Logo" 
               fill 
+              sizes="(max-width: 768px) 48px, 48px"
+              priority
               className="object-contain p-2"
             />
           </div>
@@ -168,7 +168,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-ip-text-muted hover:text-ip-primary transition-colors"
-                title={showPassword ? 'Hide password' : 'Show password'}
+                title={showPassword ? t('view') : t('edit')}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -195,7 +195,7 @@ export default function LoginPage() {
                 <p>{error}</p>
                 {!blocked && loginTracker.attempts > 0 && (
                   <p className="text-xs mt-1 text-red-500">
-                    {attemptsLeft} attempt{attemptsLeft !== 1 ? 's' : ''} remaining
+                    {t('attempts_remaining').replace('{count}', attemptsLeft.toString())}
                   </p>
                 )}
               </div>
@@ -205,9 +205,9 @@ export default function LoginPage() {
           {/* Blocked Timer */}
           {blocked && remainingTime > 0 && (
             <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm ip-fade-in">
-              <p className="font-medium">Account temporarily locked</p>
+              <p className="font-medium">{t('account_locked')}</p>
               <p className="text-xs mt-1">
-                Try again in {Math.ceil(remainingTime / 1000)} seconds
+                {t('try_again_in').replace('{count}', Math.ceil(remainingTime / 1000).toString())}
               </p>
             </div>
           )}
@@ -245,20 +245,20 @@ export default function LoginPage() {
         {/* Demo Credentials Hint */}
         <div className="mt-6 p-3 rounded-xl bg-ip-bg border border-ip-border">
           <p className="text-xs text-ip-text-muted text-center font-medium mb-1">
-            Demo Credentials
+            {t('demo_credentials')}
           </p>
           <div className="grid grid-cols-2 gap-2 text-xs text-ip-text-secondary">
             <div>
-              <span className="text-ip-text-muted">Admin:</span> admin
+              <span className="text-ip-text-muted">{t('admin')}:</span> admin
             </div>
             <div>
-              <span className="text-ip-text-muted">Pass:</span> Admin@123
+              <span className="text-ip-text-muted">{t('password')}:</span> Admin@123
             </div>
             <div>
-              <span className="text-ip-text-muted">User:</span> user1
+              <span className="text-ip-text-muted">{t('user')}:</span> user1
             </div>
             <div>
-              <span className="text-ip-text-muted">Pass:</span> User1@123
+              <span className="text-ip-text-muted">{t('password')}:</span> User1@123
             </div>
           </div>
         </div>
@@ -286,7 +286,7 @@ export default function LoginPage() {
               value={forgotEmail}
               onChange={(e) => setForgotEmail(e.target.value)}
               className="ip-input mb-4"
-              placeholder="Enter your email"
+              placeholder={t('enter_email')}
             />
 
             {forgotMessage && (
@@ -300,7 +300,7 @@ export default function LoginPage() {
                 onClick={() => setShowForgotDialog(false)}
                 className="ip-btn flex-1 py-2.5 text-sm border border-ip-border text-ip-text-secondary hover:bg-ip-surface-hover"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleForgotPassword}

@@ -64,8 +64,8 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
 
   if (ds.type === 'chart_curr_staff') {
     return (
-      <div className="w-full h-full min-h-[100px]">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="w-full h-full min-h-[140px] relative">
+        <ResponsiveContainer width="100%" height="100%" debounce={50}>
           <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
             <XAxis dataKey="name" fontSize={10} stroke="var(--ip-text-muted)" />
             <YAxis fontSize={10} stroke="var(--ip-text-muted)" domain={[0, maxStaff]} />
@@ -93,8 +93,8 @@ export function StaffWidgets({ ds }: { ds: StaffDataSource }) {
 
   if (ds.type === 'chart_estimate_payment') {
     return (
-      <div className="w-full h-full min-h-[120px]">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="w-full h-full min-h-[140px] relative">
+        <ResponsiveContainer width="100%" height="100%" debounce={50}>
           <LineChart data={payrollData} margin={{ top: 5, right: 5, left: 10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ip-border)" vertical={false} />
             <XAxis dataKey="name" fontSize={10} stroke="var(--ip-text-muted)" />

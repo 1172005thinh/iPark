@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     // Check if IP is blocked
     if (state.loginTracker.blockedUntil && Date.now() < state.loginTracker.blockedUntil) {
-      return { success: false, error: 'Too many failed attempts. Please try again later.', blocked: true };
+      return { success: false, error: 'error_too_many_attempts', blocked: true };
     }
 
     // Clear block if expired
@@ -70,7 +70,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         error_code: '0x0010',
         description: `Login attempt failed for username: ${userName}`,
         at_park_id: 1,
-        extra_info: `Username: ${userName}, Attempt: ${newAttempts}/${MAX_ATTEMPTS}`,
+        extra_info: `Username: ${userName}, Attempt: ${newAttempts}/5`,
         sent_time: nowTimestamp(),
         is_acknowledged: false,
       });
@@ -84,24 +84,24 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           event_name: 'IP Blocked',
           event_type: 'warning',
           error_code: '0x0011',
-          description: `IP blocked after ${MAX_ATTEMPTS} failed login attempts`,
+          description: `IP blocked after 5 failed login attempts`,
           at_park_id: 1,
-          extra_info: `Username: ${userName}, Blocked for ${BLOCK_DURATION_MS / 60000} minute(s)`,
+          extra_info: `Username: ${userName}, Blocked for 1 minute(s)`,
           sent_time: nowTimestamp(),
           is_acknowledged: false,
         });
 
         set({ loginTracker: { attempts: newAttempts, blockedUntil } });
-        return { success: false, error: 'Too many failed attempts. IP blocked for 1 minute.', blocked: true };
+        return { success: false, error: 'error_ip_blocked', blocked: true };
       }
 
       set({ loginTracker: { ...get().loginTracker, attempts: newAttempts } });
-      return { success: false, error: 'Invalid username or password' };
+      return { success: false, error: 'error_invalid_credentials' };
     }
 
     // Check if user is disabled
     if (!user.is_enable) {
-      return { success: false, error: 'This account has been disabled. Contact an administrator.' };
+      return { success: false, error: 'error_account_disabled' };
     }
 
     // Successful login
@@ -109,7 +109,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (!assignedGroup || !assignedGroup.is_enable) {
       return {
         success: false,
-        error: 'Your account group has been disabled. Contact an administrator.',
+        error: 'error_group_disabled',
       };
     }
 
